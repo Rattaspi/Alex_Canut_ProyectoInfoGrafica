@@ -192,11 +192,6 @@ int main() {
 
 	GLint mixCoef;
 	GLint shaderTrans;
-	glm::mat4 transMat = {
-					1,0,0,0,
-					0,1,0,0,
-					0,0,1,0,
-					0,0,0,1};
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -209,13 +204,10 @@ int main() {
 		mixCoef = glGetUniformLocation(s.Program, "mCoef");
 		glUniform1f(mixCoef, mCoef);
 
-		transMat = {
-			1,0,0,0,
-			0,1,0,0,
-			0,0,1,0,
-			0,0,0,1 };
+		glm::mat4 transMat;
 
 		transMat = glm::translate(transMat, glm::vec3(0.5f, 0.5f, 0.f));
+		transMat = glm::scale(transMat, glm::vec3(0.5f, 0.5f, 0.f));
 
 		shaderTrans = glGetUniformLocation(s.Program, "transf");
 		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(transMat));
