@@ -5,6 +5,10 @@
 #include <iostream>
 #include "..\Shader.h"
 #include <SOIL.h>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
 
 using namespace std;
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -187,7 +191,13 @@ int main() {
 	
 
 	GLint mixCoef;
-	
+	GLint shaderTrans;
+	glm::mat4 transMat = {
+					1,0,0,0,
+					0,1,0,0,
+					0,0,1,0,
+					0,0,0,1};
+
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
 	{
@@ -198,18 +208,17 @@ int main() {
 
 		mixCoef = glGetUniformLocation(s.Program, "mCoef");
 		glUniform1f(mixCoef, mCoef);
-		std::cout << mCoef << std::endl;
-		/*DrawVao(s.Program, VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);*/
 
-		//pintar con lineas
-		//pintar con triangulos
-		/*glBindTexture(GL_TEXTURE_2D, texture1);
-		s.USE();
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);*/
+		transMat = {
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1 };
+
+		transMat = glm::translate(transMat, glm::vec3(0.5f, 0.5f, 0.f));
+
+		shaderTrans = glGetUniformLocation(s.Program, "transf");
+		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(transMat));
 
 		s.USE();
 		glActiveTexture(GL_TEXTURE0);
@@ -243,10 +252,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	//TODO, comprobar que la tecla pulsada es escape para cerrar la aplicación y la tecla w para cambiar a modo widwframe
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-
-	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-		paintQuad = !paintQuad;
-	}
 
 	if ((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS) {
 		
