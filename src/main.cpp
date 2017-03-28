@@ -16,7 +16,8 @@ bool WIDEFRAME = false;
 bool paintQuad=false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 float mCoef = 0;
-
+float deg = 0;
+bool l, r;
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -201,12 +202,16 @@ int main() {
 		//Establecer el color de fondo
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		if (l) deg += 1;
+		else if (r) deg -= 1;
+
 		mixCoef = glGetUniformLocation(s.Program, "mCoef");
 		glUniform1f(mixCoef, mCoef);
 
 		glm::mat4 transMat;
 
 		transMat = glm::translate(transMat, glm::vec3(0.5f, 0.5f, 0.f));
+		transMat = glm::rotate(transMat, glm::radians(deg), glm::vec3(0, 0, 1));
 		transMat = glm::scale(transMat, glm::vec3(0.5f, 0.5f, 0.f));
 
 		shaderTrans = glGetUniformLocation(s.Program, "transf");
@@ -256,5 +261,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		if (mCoef > 0.1f) {
 			mCoef -= 0.1f;
 		}
+	}
+
+	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+		r = true;
+	}
+	else if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE) {
+		r = false;
+	}
+	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+		l = true;
+	}
+	else if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE) {
+		l = false;
 	}
 }
