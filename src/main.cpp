@@ -24,7 +24,7 @@ void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
 	glUseProgram(programID);
 
-	//pitar el VAO
+	//pintar el VAO
 	glBindVertexArray(VAO);
 	if (!paintQuad) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
