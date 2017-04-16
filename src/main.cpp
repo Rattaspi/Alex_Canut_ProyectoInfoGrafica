@@ -47,13 +47,8 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-
 	//create a window
-//TODO
 	GLFWwindow* window;
-
-
-
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Primera ventana", nullptr, nullptr);
 	if (!window) {
 		cout << "Error al crear la ventana" << endl;
@@ -63,8 +58,6 @@ int main() {
 	glfwMakeContextCurrent(window);
 
 	//set GLEW and inicializate
-//TODO
-
 	glewExperimental = GL_TRUE;
 	if (GLEW_OK != glewInit()) {
 		std::cout << "Error al inicializar glew" << std::endl;
@@ -74,27 +67,20 @@ int main() {
 	int screenWithd, screenHeight;
 	glfwGetFramebufferSize(window, &screenWithd, &screenHeight);
 	//set function when callback
-//TODO
 		glfwSetKeyCallback(window, key_callback);
 
 	//set windows and viewport
-//TODO
 		glViewport(0, 0, screenWithd, screenHeight);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 	//fondo
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0);
 
-
-//TODO
-
-
 	//cargamos los shader
 	Shader s = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 
 	// Definir el buffer de vertices
 	//Reserva de memoria
-
 	GLfloat Vertices[] = {
 	0.5f,0.5f,0,	1.0f,.0f,.0f,	1.f,1.f,
 	0.5f,-0.5f,0,	0.f, 1.f, 1.f,	1.f, 0.f,
@@ -123,7 +109,6 @@ int main() {
 		
 
 		//Propiedades
-
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 
