@@ -36,6 +36,8 @@ void DrawVao(GLuint programID,GLuint VAO) {
 
 }
 int main() {
+	glEnable(GL_DEPTH_TEST)
+	
 	//initGLFW
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
@@ -123,27 +125,6 @@ int main() {
 
 	}glBindVertexArray(0);
 
-
-
-	//reservar memoria para el VAO, VBO y EBO&
-
-
-
-	//Establecer el objeto
-		//Declarar el VBO y el EBO
-
-		//Enlazar el buffer con openGL
-
-		//Establecer las propiedades de los vertices
-
-		//liberar el buffer
-	
-	//liberar el buffer de vertices
-	
-
-	/*unsigned char* tex2 = SOIL_load_image("texture2.png", &width, &height, 0, SOIL_LOAD_RGB);
-	SOIL_free_image_data(tex2);*/
-
 	//CREAR TEXTURAS
 	GLuint texture1, texture2;
 	int width, height;
@@ -193,14 +174,25 @@ int main() {
 		mixCoef = glGetUniformLocation(s.Program, "mCoef");
 		glUniform1f(mixCoef, mCoef);
 
-		glm::mat4 transMat;
+		float FOV = 60;
 
-		transMat = glm::translate(transMat, glm::vec3(0.5f, 0.5f, 0.f));
-		transMat = glm::rotate(transMat, glm::radians(deg), glm::vec3(0, 0, 1));
-		transMat = glm::scale(transMat, glm::vec3(0.5f, 0.5f, 0.f));
+		//proyeccion * vista * modelo
+		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
-		shaderTrans = glGetUniformLocation(s.Program, "transf");
-		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(transMat));
+		//calculo matriz modelo
+		modelMat = glm::translate(modelMat, glm::vec3(0.f, -0.5f, 0.f));
+		modelMat = glm::rotate(modelMat, glm::radians(50.f), glm::vec3(1, 0, 0));
+		
+		//calculo matriz vista
+		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
+
+		//calculo matriz proyeccion
+		projectionMat = glm::perspective(FOV, (float)(WIDTH/HEIGHT), 0.f, 1.f);
+
+		finalMat = modelMat * viewMat * projectionMat/* * viewMat * modelMat*/;
+
+		shaderTrans = glGetUniformLocation(s.Program, "finalMat");
+		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
 
 		s.USE();
 		glActiveTexture(GL_TEXTURE0);
