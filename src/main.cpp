@@ -36,7 +36,7 @@ void DrawVao(GLuint programID,GLuint VAO) {
 
 }
 int main() {
-	glEnable(GL_DEPTH_TEST)
+	glEnable(GL_DEPTH_TEST);
 	
 	//initGLFW
 	if (!glfwInit())
@@ -187,7 +187,7 @@ int main() {
 		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
 
 		//calculo matriz proyeccion
-		projectionMat = glm::perspective(FOV, (float)(WIDTH/HEIGHT), 0.f, 1.f);
+		projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH/HEIGHT), 0.1f, 100.f);
 
 		finalMat = modelMat * viewMat * projectionMat/* * viewMat * modelMat*/;
 
