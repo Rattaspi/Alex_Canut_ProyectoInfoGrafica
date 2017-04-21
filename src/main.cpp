@@ -185,6 +185,7 @@ int main() {
 		
 		//calculo matriz vista
 		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
+		//UTILIZAR UN LOOKAT
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH/HEIGHT), 0.1f, 100.f);
