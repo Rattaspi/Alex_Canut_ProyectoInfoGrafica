@@ -15,7 +15,8 @@ const GLint WIDTH = 800, HEIGHT = 600;
 bool WIDEFRAME = false;
 bool paintQuad=false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate);
+glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
+glm::mat4 LookAt();
 float mCoef = 0;
 float deg = 0;
 bool l, r;
@@ -293,4 +294,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-void ModelMatGen ()
+glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot) {
+	glm::mat4 model;
+	model = glm::translate(model, translate);
+	model = glm::rotate(model,glm::radians(rot), rotate);
+	model = glm::scale(model, scale);
+}
