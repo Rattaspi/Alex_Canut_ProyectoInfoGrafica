@@ -155,10 +155,10 @@ int main() {
 		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_DYNAMIC_DRAW);
 
 		//Propiedades
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (GLvoid*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
 		glEnableVertexAttribArray(1);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -260,18 +260,18 @@ int main() {
 		modelMat = glm::rotate(modelMat, glm::radians(rotY), glm::vec3(0, 1, 0));
 
 		//calculo matriz vista
-		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
+		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -10.3f));
 
 		//calculo matriz proyeccion
-		//projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH / HEIGHT), 0.1f, 100.f);
+		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
 
-		finalMat = modelMat * viewMat * projectionMat /** viewMat * modelMat*/;
+		finalMat = /*modelMat * viewMat * */projectionMat * viewMat * modelMat;
 
 		shaderTrans = glGetUniformLocation(s.Program, "finalMat");
 		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 108);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
