@@ -219,15 +219,15 @@ int main() {
 
 		//calculo matriz modelo
 		modelMat = glm::translate(modelMat, glm::vec3(0.f, -0.5f, 0.f));
-		modelMat = glm::rotate(modelMat, glm::radians(50.f), glm::vec3(1, 0, 1));
+		modelMat = glm::rotate(modelMat, glm::radians(50.f), glm::vec3(1, 0, 0));
 		
 		//calculo matriz vista
-		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, 0.3f));
+		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
 		//viewMat = glm::rotate(viewMat, glm::radians(180.f), glm::vec3(0,1,0));
 		//UTILIZAR UN LOOKAT
 
 		//calculo matriz proyeccion
-		//projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH/HEIGHT), 0.1f, 100.f);
+		projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH/HEIGHT), 0.1f, 100.f);
 
 		finalMat = modelMat * viewMat * projectionMat/* * viewMat * modelMat*/;
 
@@ -243,11 +243,14 @@ int main() {
 		glUniform1i(glGetUniformLocation(s.Program, "ourTexture2"), 1);
 
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0);
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
+
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	// liberar la memoria de los VAO, EBO y VBO
 	glBindTexture(GL_TEXTURE_2D,0);
@@ -299,4 +302,5 @@ glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, fl
 	model = glm::translate(model, translate);
 	model = glm::rotate(model,glm::radians(rot), rotate);
 	model = glm::scale(model, scale);
+	return model;
 }
