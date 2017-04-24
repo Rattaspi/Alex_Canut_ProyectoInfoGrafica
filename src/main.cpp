@@ -19,7 +19,9 @@ glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, fl
 glm::mat4 LookAt();
 float mCoef = 0;
 float deg = 0;
-bool l, r;
+bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
+float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
+float inc = 0.5f; //coeficiente con el cual se incrementa la rotacion
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -194,7 +196,6 @@ int main() {
 	SOIL_free_image_data(tex2);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
-
 	GLint mixCoef;
 	GLint shaderTrans;
 
@@ -204,35 +205,13 @@ int main() {
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		//Establecer el color de fondo
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if (l) deg += 1;
-		else if (r) deg -= 1;
+		//if (l) deg += 1;
+		//else if (r) deg -= 1;
 
 		mixCoef = glGetUniformLocation(s.Program, "mCoef");
-		glUniform1f(mixCoef, mCoef);
-
-		float FOV = 60;
-
-		//proyeccion * vista * modelo
-		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
-
-		//calculo matriz modelo
-		modelMat = glm::translate(modelMat, glm::vec3(0.f, -0.5f, 0.f));
-		modelMat = glm::rotate(modelMat, glm::radians(50.f), glm::vec3(1, 0, 0));
-		
-		//calculo matriz vista
-		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
-		//viewMat = glm::rotate(viewMat, glm::radians(180.f), glm::vec3(0,1,0));
-		//UTILIZAR UN LOOKAT
-
-		//calculo matriz proyeccion
-		projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH/HEIGHT), 0.1f, 100.f);
-
-		finalMat = modelMat * viewMat * projectionMat/* * viewMat * modelMat*/;
-
-		shaderTrans = glGetUniformLocation(s.Program, "finalMat");
-		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
+		glUniform1f(mixCoef, mCoef); //Se envia al shader el coeficiente del mix	
 
 		s.USE();
 		glActiveTexture(GL_TEXTURE0);
@@ -242,22 +221,67 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		glUniform1i(glGetUniformLocation(s.Program, "ourTexture2"), 1);
 
+		//Controla la rotacion del cubo
+		//rotacion sobre el eje Y
+		if (rotLeft) {
+			rotY -= inc;
+		}
+		else if (rotRight) {
+			rotY += inc;
+		}
+		//rotacion sobre el eje X
+		if (rotUp) {
+			rotX -= inc;
+		}
+		else if (rotDown) {
+			rotX += inc;
+		}
+
+		//controla el intercambio de la textura
+		if (fade) {
+			if (mCoef >= 0 && mCoef < 1) {
+				mCoef += 0.01f;
+			}
+		}
+		else {
+			if (mCoef >0.01f) {
+				mCoef -= 0.01f;
+			}
+		}
+
+		float FOV = 45; //Field of view
+
+		//proyeccion * vista * modelo
+		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
+
+		//calculo matriz modelo
+		modelMat = glm::translate(modelMat, glm::vec3(0.f, -0.5f, 0.f));
+		modelMat = glm::rotate(modelMat, glm::radians(rotX), glm::vec3(1, 0, 0));
+		modelMat = glm::rotate(modelMat, glm::radians(rotY), glm::vec3(0, 1, 0));
+
+		//calculo matriz vista
+		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -0.3f));
+
+		//calculo matriz proyeccion
+		//projectionMat = glm::perspective(glm::radians(FOV), (GLfloat)(WIDTH / HEIGHT), 0.1f, 100.f);
+
+		finalMat = modelMat * viewMat * projectionMat /** viewMat * modelMat*/;
+
+		shaderTrans = glGetUniformLocation(s.Program, "finalMat");
+		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
+
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
+		glDrawArrays(GL_TRIANGLES, 0, 108);
 		glBindVertexArray(0);
-
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
-
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
+
 	// liberar la memoria de los VAO, EBO y VBO
 	glBindTexture(GL_TEXTURE_2D,0);
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -270,30 +294,40 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	if ((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS) {
-		
-		if (mCoef < 1.f) {
-			mCoef += 0.1f;
-		}
+	//para el fade de texturas
+	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+		fade = true;
 	}
-	else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_S) && action == GLFW_PRESS) {
-		
-		if (mCoef > 0.1f) {
-			mCoef -= 0.1f;
-		}
+	else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+		fade = false;
 	}
 
+	//rotacion en el eje Y
 	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-		r = true;
+		rotRight = true;
 	}
 	else if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE) {
-		r = false;
+		rotRight = false;
 	}
 	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-		l = true;
+		rotLeft = true;
 	}
 	else if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE) {
-		l = false;
+		rotLeft = false;
+	}
+
+	//rotacion en el eje X
+	if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+		rotUp = true;
+	}
+	else if (key == GLFW_KEY_UP && action == GLFW_RELEASE) {
+		rotUp = false;
+	}
+	else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+		rotDown = true;
+	}
+	else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE) {
+		rotDown = false;
 	}
 }
 

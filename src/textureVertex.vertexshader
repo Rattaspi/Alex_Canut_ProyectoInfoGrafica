@@ -10,6 +10,6 @@ uniform mat4 finalMat;
 out vec2 TexCoord;
 
 void main(){
-	gl_Position = finalMat * (vec4(-1*pos,1));
+	gl_Position = finalMat * (vec4((pos),1));
 	TexCoord = tex;
 }

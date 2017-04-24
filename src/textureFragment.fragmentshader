@@ -12,5 +12,4 @@ uniform float mCoef;
 
 void main(){
 	color = mix(texture(ourTexture, TexCoord), texture(ourTexture2, TexCoord), mCoef);
-	//color = texture(ourTexture,TexCoord);
 }
