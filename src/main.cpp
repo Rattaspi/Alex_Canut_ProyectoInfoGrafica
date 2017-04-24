@@ -21,7 +21,7 @@ float mCoef = 0;
 float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
-float inc = 0.5f; //coeficiente con el cual se incrementa la rotacion
+float inc = 0.01f; //coeficiente con el cual se incrementa la rotacion
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -197,7 +197,7 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	GLint mixCoef;
-	GLint shaderTrans;
+	GLint shaderTrans = glGetUniformLocation(s.Program, "finalMat");;
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -206,9 +206,6 @@ int main() {
 		glfwPollEvents();
 		//Establecer el color de fondo
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//if (l) deg += 1;
-		//else if (r) deg -= 1;
 
 		mixCoef = glGetUniformLocation(s.Program, "mCoef");
 		glUniform1f(mixCoef, mCoef); //Se envia al shader el coeficiente del mix	
@@ -254,24 +251,30 @@ int main() {
 		//proyeccion * vista * modelo
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
-		//calculo matriz modelo
-		modelMat = glm::translate(modelMat, glm::vec3(0.f, -0.5f, 0.f));
-		modelMat = glm::rotate(modelMat, glm::radians(rotX), glm::vec3(1, 0, 0));
-		modelMat = glm::rotate(modelMat, glm::radians(rotY), glm::vec3(0, 1, 0));
-
 		//calculo matriz vista
-		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -10.3f));
+		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -15.3f));
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
-
-		finalMat = /*modelMat * viewMat * */projectionMat * viewMat * modelMat;
-
-		shaderTrans = glGetUniformLocation(s.Program, "finalMat");
-		glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
-
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (int i = 0; i < 10; i++) {
+			//calculo matriz modelo para cada cubo
+			if (i == 0) {
+				modelMat = glm::translate(modelMat, CubesPositionBuffer[i]);
+				modelMat = glm::rotate(modelMat, glm::radians(rotX), glm::vec3(1, 0, 0));
+				modelMat = glm::rotate(modelMat, glm::radians(rotY), glm::vec3(0, 1, 0));
+			}
+			else {
+				float rotation = glfwGetTime() * 100;
+				rotation = (int)rotation % 360;
+				modelMat = modelMatGen(glm::vec3(0.0f), glm::vec3(1.f, 0.5f, 0.f), CubesPositionBuffer[i], rotation);
+			}
+			//calculo de la matriz final
+			finalMat = /*modelMat * viewMat * */projectionMat * viewMat * modelMat;
+			//se envia la matriz al shader
+			glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
