@@ -16,12 +16,15 @@ bool WIDEFRAME = false;
 bool paintQuad=false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
-glm::mat4 LookAt();
+glm::mat4 LookAt(glm::vec3, glm::vec3 ,glm::vec3, glm::vec3);
 float mCoef = 0;
 float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
+glm::vec3 cameraPos, cameraFront, cameraUp, cameraRight; //vectores de la camara
+float cameraSpeed;
+bool movLeft, movRight, movFront, movBack = false;
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -151,7 +154,7 @@ int main() {
 		//Se enlaza el buffer para poder usarlo
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		//Se pasan los datos
-		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_STATIC_DRAW);
 
 		//Propiedades
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)0);
@@ -196,7 +199,14 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	GLint mixCoef;
-	GLint shaderTrans = glGetUniformLocation(s.Program, "finalMat");;
+	GLint shaderTrans = glGetUniformLocation(s.Program, "finalMat");
+
+	//INICIALIZAR LA COSAS DE LA CAMARA
+	cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	cameraFront = glm::normalize(glm::vec3(0, 0, 0) - cameraPos);
+	cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));
+	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+	cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -245,13 +255,28 @@ int main() {
 			}
 		}
 
+		//MOVIMIENTO DE CAMARA
+		if (movFront) {
+			cameraPos -= cameraFront;
+		}
+		else if (movBack) {
+			cameraPos += cameraFront;
+		}
+
+		if (movRight) {
+			cameraPos -= cameraRight;
+		}
+		else if (movLeft) {
+			cameraPos += cameraRight;
+		}
+
 		float FOV = 45; //Field of view
 
 		//proyeccion * vista * modelo
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
-		//calculo matriz vista
-		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -5.3f));
+		//calculo matriz vista (AQUI VA LA CAMARA)
+		viewMat = glm::translate(viewMat, cameraPos);
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
@@ -268,9 +293,8 @@ int main() {
 				rotation = (int)rotation % 360;
 				modelMat = modelMatGen(glm::vec3(1.0f), glm::vec3(1.f, 0.5f, 0.f), CubesPositionBuffer[i], rotation);
 			}
-			cout << "cubo--> " << i << endl;
 			//calculo de la matriz final
-			finalMat = /*modelMat * viewMat * */projectionMat * viewMat * modelMat;
+			finalMat = projectionMat * viewMat * modelMat;
 			//se envia la matriz al shader
 			glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -332,6 +356,34 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE) {
 		rotDown = false;
 	}
+
+	//movimiento camara horizontal
+	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+		movLeft = true;
+	}
+	else if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
+		movLeft = false;
+	}
+	else if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+		movRight = true;
+	}
+	else if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+		movRight = false;
+	}
+
+	//movimiento camara alante y atras
+	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+		movFront = true;
+	}
+	else if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
+		movFront = false;
+	}
+	else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+		movBack = true;
+	}
+	else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+		movBack = false;
+	}
 }
 
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot) {
@@ -340,4 +392,27 @@ glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, fl
 	model = glm::rotate(model,glm::radians(rot), rotate);
 	model = glm::scale(model, scale);
 	return model;
+}
+
+glm::mat4 LookAt(glm::vec3 right, glm::vec3 up, glm::vec3 front, glm::vec3 pos) {
+	glm::mat4 lookAt;
+	lookAt[3][3] = 1;
+
+	lookAt[0][0] = right.x;
+	lookAt[0][1] = right.y;
+	lookAt[0][2] = right.z;
+
+	lookAt[1][0] = up.x;
+	lookAt[1][1] = up.y;
+	lookAt[1][2] = up.z;
+
+	lookAt[2][0] = front.x;
+	lookAt[2][1] = front.y;
+	lookAt[2][2] = front.z;
+
+	lookAt[0][3] = -pos.x;
+	lookAt[1][3] = -pos.y;
+	lookAt[2][3] = -pos.z;
+
+	return lookAt;
 }
