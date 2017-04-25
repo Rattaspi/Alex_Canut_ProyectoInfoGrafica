@@ -21,7 +21,7 @@ float mCoef = 0;
 float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
-float inc = 0.01f; //coeficiente con el cual se incrementa la rotacion
+float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -40,8 +40,6 @@ void DrawVao(GLuint programID,GLuint VAO) {
 
 }
 int main() {
-	glEnable(GL_DEPTH_TEST);
-	
 	//initGLFW
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
@@ -77,7 +75,7 @@ int main() {
 
 	//set windows and viewport
 		glViewport(0, 0, screenWithd, screenHeight);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//fondo
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0);
@@ -143,6 +141,7 @@ int main() {
 		glm::vec3(1.5f ,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
+	glEnable(GL_DEPTH_TEST);
 
 	GLuint VAO, EBO, VBO;
 	glGenVertexArrays(1,&VAO);
@@ -252,7 +251,7 @@ int main() {
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
 		//calculo matriz vista
-		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -15.3f));
+		viewMat = glm::translate(viewMat, glm::vec3(0.f, 0.f, -5.3f));
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
@@ -267,8 +266,9 @@ int main() {
 			else {
 				float rotation = glfwGetTime() * 100;
 				rotation = (int)rotation % 360;
-				modelMat = modelMatGen(glm::vec3(0.0f), glm::vec3(1.f, 0.5f, 0.f), CubesPositionBuffer[i], rotation);
+				modelMat = modelMatGen(glm::vec3(1.0f), glm::vec3(1.f, 0.5f, 0.f), CubesPositionBuffer[i], rotation);
 			}
+			cout << "cubo--> " << i << endl;
 			//calculo de la matriz final
 			finalMat = /*modelMat * viewMat * */projectionMat * viewMat * modelMat;
 			//se envia la matriz al shader
