@@ -276,7 +276,12 @@ int main() {
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
 		//calculo matriz vista (AQUI VA LA CAMARA)
-		viewMat = glm::translate(viewMat, cameraPos);
+		//viewMat = glm::translate(viewMat, cameraPos);
+		GLfloat radio = 8.0f;
+		GLfloat X = glm::sin(glfwGetTime())*radio;
+		GLfloat Z = glm::cos(glfwGetTime())*radio;
+		viewMat = glm::lookAt(glm::vec3(X,0,Z), glm::vec3(0), glm::vec3(0,1,0));
+
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
