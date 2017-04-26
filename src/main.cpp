@@ -23,7 +23,7 @@ bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotand
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
 glm::vec3 cameraPos, cameraFront, cameraUp, cameraRight; //vectores de la camara
-float cameraSpeed;
+float cameraSpeed = 20;
 bool movLeft, movRight, movFront, movBack = false;
 
 void DrawVao(GLuint programID,GLuint VAO) {
@@ -208,6 +208,8 @@ int main() {
 	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
 	cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
 
+	float dt, prevT = 0, currT = 0; // esto es para el delta time
+
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
 	{
@@ -257,18 +259,24 @@ int main() {
 
 		//MOVIMIENTO DE CAMARA
 		if (movFront) {
-			cameraPos -= cameraFront;
+			cameraPos -= cameraFront * cameraSpeed * dt;
 		}
 		else if (movBack) {
-			cameraPos += cameraFront;
+			cameraPos += cameraFront * cameraSpeed * dt;
 		}
 
 		if (movRight) {
-			cameraPos -= cameraRight;
+			cameraPos -= cameraRight * cameraSpeed * dt;
 		}
 		else if (movLeft) {
-			cameraPos += cameraRight;
+			cameraPos += cameraRight * cameraSpeed * dt;
 		}
+
+		//CALCULO DELTA TIME
+		currT = glfwGetTime();
+		dt = currT - prevT;
+		prevT = currT;
+
 
 		float FOV = 45; //Field of view
 
@@ -276,12 +284,7 @@ int main() {
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
 		//calculo matriz vista (AQUI VA LA CAMARA)
-		//viewMat = glm::translate(viewMat, cameraPos);
-		GLfloat radio = 8.0f;
-		GLfloat X = glm::sin(glfwGetTime())*radio;
-		GLfloat Z = glm::cos(glfwGetTime())*radio;
-		viewMat = glm::lookAt(glm::vec3(X,0,Z), glm::vec3(0), glm::vec3(0,1,0));
-
+		viewMat = glm::translate(viewMat, cameraPos);
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
