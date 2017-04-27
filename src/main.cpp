@@ -17,6 +17,8 @@ bool paintQuad=false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
 glm::mat4 LookAt(glm::vec3, glm::vec3 ,glm::vec3, glm::vec3);
+void Mouse_Callback(GLFWwindow*, double, double);
+void Wheel_Callback(GLFWwindow*, double, double);
 float mCoef = 0;
 float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
@@ -25,6 +27,9 @@ float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
 glm::vec3 cameraPos, cameraFront, cameraUp, cameraRight; //vectores de la camara
 float cameraSpeed = 20;
 bool movLeft, movRight, movFront, movBack = false;
+bool doOnce = false; //se utiliza en el mouse callback
+double offsetX, offsetY, prevMouseX, prevMouseY; //coordenadas anteriores y actuales de la posicion del raton
+float sensivilidadMouse = 0.04;
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -46,14 +51,12 @@ int main() {
 	//initGLFW
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
-//TODO
 
 	//set GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
 	//create a window
 	GLFWwindow* window;
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Primera ventana", nullptr, nullptr);
@@ -63,6 +66,9 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 	glfwMakeContextCurrent(window);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, Mouse_Callback);
+	glfwSetScrollCallback(window, Wheel_Callback);
 
 	//set GLEW and inicializate
 	glewExperimental = GL_TRUE;
@@ -392,6 +398,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
 		movBack = false;
 	}
+}
+
+void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
+	if (!doOnce) {
+		prevMouseX = xPos;
+		prevMouseY = yPos;
+		doOnce = true;
+	}
+
+	offsetX = xPos - prevMouseX;
+	offsetY = yPos - prevMouseY;
+	offsetX *= sensivilidadMouse;
+	offsetY *= sensivilidadMouse;
+
+	prevMouseX = xPos;
+	prevMouseY = yPos;
 }
 
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot) {
