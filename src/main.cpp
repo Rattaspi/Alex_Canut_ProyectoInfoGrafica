@@ -14,11 +14,13 @@ using namespace std;
 const GLint WIDTH = 800, HEIGHT = 600;
 bool WIDEFRAME = false;
 bool paintQuad=false;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
 glm::mat4 LookAt(glm::vec3, glm::vec3 ,glm::vec3, glm::vec3);
 void Mouse_Callback(GLFWwindow*, double, double);
 void Wheel_Callback(GLFWwindow*, double, double);
+
 float mCoef = 0;
 float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
@@ -28,8 +30,9 @@ glm::vec3 cameraPos, cameraFront, cameraUp, cameraRight; //vectores de la camara
 float cameraSpeed = 20;
 bool movLeft, movRight, movFront, movBack = false;
 bool doOnce = false; //se utiliza en el mouse callback
-double offsetX, offsetY, prevMouseX, prevMouseY; //coordenadas anteriores y actuales de la posicion del raton
+float pitch = 0, yaw = 270.0f;
 float sensivilidadMouse = 0.04;
+float FOV = 45; //Field of view
 
 void DrawVao(GLuint programID,GLuint VAO) {
 	//establecer el shader
@@ -283,9 +286,6 @@ int main() {
 		dt = currT - prevT;
 		prevT = currT;
 
-
-		float FOV = 45; //Field of view
-
 		//proyeccion * vista * modelo
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
@@ -401,6 +401,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
+	double offsetX, offsetY, prevMouseX, prevMouseY; //coordenadas anteriores y actuales de la posicion del raton
+	glm::vec3 front; //nuevo vector front que tendrá nuestra camara
 	if (!doOnce) {
 		prevMouseX = xPos;
 		prevMouseY = yPos;
@@ -412,8 +414,30 @@ void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
 	offsetX *= sensivilidadMouse;
 	offsetY *= sensivilidadMouse;
 
+	yaw += offsetX;
+	pitch -= offsetY;
+	pitch = glm::clamp(pitch, -89.0f, 89.0f);
+	yaw = glm::mod(yaw, 360.f);
+	front.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+	front.y = glm::sin(glm::radians(pitch));
+	front.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+
+
 	prevMouseX = xPos;
 	prevMouseY = yPos;
+}
+
+void Wheel_Callback(GLFWwindow* window, double xOffset, double yOffset) {
+	if (FOV >= 1.0f && FOV <= 60.f) {
+		FOV -= yOffset;
+	}
+	if (FOV <= 1.0f) {
+		FOV = 1.0f;
+	}
+	else if (FOV >= 60.0f) {
+		FOV = 60.0f;
+	}
 }
 
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot) {
