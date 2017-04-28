@@ -28,9 +28,9 @@ float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la ro
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
 glm::vec3 cameraPos, cameraFront, cameraUp, cameraRight; //vectores de la camara
 float cameraSpeed = 20;
-bool movLeft, movRight, movFront, movBack = false;
+bool movLeft, movRight, movFront, movBack;
 bool doOnce = false; //se utiliza en el mouse callback
-float pitch = 0, yaw = 270.0f;
+float pitch, yaw, prevMouseX, prevMouseY;
 float sensivilidadMouse = 0.04;
 float FOV = 45; //Field of view
 
@@ -211,8 +211,16 @@ int main() {
 	GLint shaderTrans = glGetUniformLocation(s.Program, "finalMat");
 
 	//INICIALIZAR LA COSAS DE LA CAMARA
-	cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	cameraPos = glm::vec3(0.0f, 0.0f, -7.0f);
+
 	cameraFront = glm::normalize(glm::vec3(0, 0, 0) - cameraPos);
+	glm::vec3 dirX, dirY;
+	dirX = glm::normalize(glm::vec3(0, cameraFront.y, cameraFront.z));
+	dirY = glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+
+	pitch = 90 - glm::degrees(glm::acos(glm::dot(glm::vec3(0, 1, 0), dirX)));
+	yaw = 90 - glm::degrees(glm::acos(glm::dot(dirY, glm::vec3(0,0,1))));
+	
 	cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));
 	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
 	cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
@@ -241,10 +249,10 @@ int main() {
 		//Controla la rotacion del cubo
 		//rotacion sobre el eje Y
 		if (rotLeft) {
-			rotY -= inc;
+			rotY += inc;
 		}
 		else if (rotRight) {
-			rotY += inc;
+			rotY -= inc;
 		}
 		//rotacion sobre el eje X
 		if (rotUp) {
@@ -290,7 +298,7 @@ int main() {
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
 		//calculo matriz vista (AQUI VA LA CAMARA)
-		viewMat = glm::translate(viewMat, cameraPos);
+		viewMat = LookAt(cameraRight, cameraUp, cameraFront, cameraPos);
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
@@ -314,6 +322,7 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		glBindVertexArray(0);
+		//cout << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << endl;
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
@@ -401,7 +410,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
-	double offsetX, offsetY, prevMouseX, prevMouseY; //coordenadas anteriores y actuales de la posicion del raton
+	double offsetX, offsetY; //coordenadas anteriores y actuales de la posicion del raton
 	glm::vec3 front; //nuevo vector front que tendrá nuestra camara
 	if (!doOnce) {
 		prevMouseX = xPos;
@@ -422,7 +431,9 @@ void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
 	front.y = glm::sin(glm::radians(pitch));
 	front.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
 	cameraFront = glm::normalize(front);
-
+	cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0,1,0)));
+	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+	cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
 
 	prevMouseX = xPos;
 	prevMouseY = yPos;
@@ -452,6 +463,22 @@ glm::mat4 LookAt(glm::vec3 right, glm::vec3 up, glm::vec3 front, glm::vec3 pos) 
 	glm::mat4 lookAt;
 	lookAt[3][3] = 1;
 
+	//lookAt[0][0] = right.x;
+	//lookAt[1][0] = right.y;
+	//lookAt[2][0] = right.z;
+
+	//lookAt[0][1] = up.x;
+	//lookAt[1][1] = up.y;
+	//lookAt[2][1] = up.z;
+
+	//lookAt[0][2] = front.x;
+	//lookAt[1][2] = front.y;
+	//lookAt[2][2] = front.z;
+
+	//lookAt[3][0] = -pos.x;
+	//lookAt[3][1] = -pos.y;
+	//lookAt[3][2] = -pos.z;
+
 	lookAt[0][0] = right.x;
 	lookAt[0][1] = right.y;
 	lookAt[0][2] = right.z;
@@ -467,6 +494,8 @@ glm::mat4 LookAt(glm::vec3 right, glm::vec3 up, glm::vec3 front, glm::vec3 pos) 
 	lookAt[0][3] = -pos.x;
 	lookAt[1][3] = -pos.y;
 	lookAt[2][3] = -pos.z;
+
+	lookAt = glm::transpose(lookAt);
 
 	return lookAt;
 }
