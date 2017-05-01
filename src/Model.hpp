@@ -1,5 +1,5 @@
 #pragma once
-#include "Mesh.h"
+#include "Mesh.hpp"
 #include <SOIL.h>
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>

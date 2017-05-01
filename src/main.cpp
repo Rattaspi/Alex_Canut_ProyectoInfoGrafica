@@ -3,14 +3,15 @@
 //GLFW
 #include <GLFW\glfw3.h>
 #include <iostream>
-#include "..\Shader.h"
+#include "..\Shader.hpp"
 #include <SOIL.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include "Camera.h"
-#include "Mesh.h"
-#include "Model.h"
+#include "Camera.hpp"
+#include "Mesh.hpp"
+#include "Model.hpp"
+#include "Object.hpp"
 
 
 using namespace std;
@@ -62,136 +63,26 @@ int main() {
 	int screenWithd, screenHeight;
 	glfwGetFramebufferSize(window, &screenWithd, &screenHeight);
 	//set function when callback
-		glfwSetKeyCallback(window, key_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	//set windows and viewport
-		glViewport(0, 0, screenWithd, screenHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, screenWithd, screenHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//fondo
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0);
+	glClearColor(0.f, 0.f, 0.f, 1.0);
 
 	//cargamos los shader
 	Shader shader = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
-
-	// Definir el buffer de vertices
-	//Reserva de memoria
-	GLfloat VertexBufferCube[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f , -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f ,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f ,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f , -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f , -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f , -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f , -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-
-	glm::vec3 CubesPositionBuffer[] = {
-		glm::vec3(0.0f ,  0.0f,  0.0f),
-		glm::vec3(2.0f ,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f , -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f , -2.0f, -2.5f),
-		glm::vec3(1.5f ,  2.0f, -2.5f),
-		glm::vec3(1.5f ,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
 	glEnable(GL_DEPTH_TEST);
 
-	GLuint VAO, EBO, VBO;
-	glGenVertexArrays(1,&VAO);
-	glBindVertexArray(VAO); {
-
-		glGenBuffers(1, &VBO);
-		//Se enlaza el buffer para poder usarlo
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		//Se pasan los datos
-		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_STATIC_DRAW);
-
-		//Propiedades
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
-		glEnableVertexAttribArray(1);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	}glBindVertexArray(0);
-
-	//CREAR TEXTURAS
-	GLuint texture1, texture2;
-	int width, height;
-	
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);*/
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	unsigned char* tex1 = SOIL_load_image("./src/texture.png", &width, &height, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex1);
-	SOIL_free_image_data(tex1);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//TEXTURA 2
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);*/
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	unsigned char* tex2 = SOIL_load_image("./src/texture2.png", &width, &height, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex2);
-	SOIL_free_image_data(tex2);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	
-	GLint mixCoef;
 	GLint shaderTrans = glGetUniformLocation(shader.Program, "finalMat");
 
-	//INSTANCIACION DE LOS OBJETOS 3D
-	Model spiderModel;
-	spiderModel.loadModel("./src/spider/spider.obj");
+	//se instancian las dos cajas
+	Object movingBox(glm::vec3(0.5f,0.5f,0.5f),glm::vec3(0),glm::vec3(0),Object::cube);
+	Object staticBox(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(4.f, 0.f, 0.f), Object::cube);
+
+	GLint finalMatID = glGetUniformLocation(shader.Program, "finalMat");
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -200,46 +91,7 @@ int main() {
 		glfwPollEvents();
 		//Establecer el color de fondo
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		mixCoef = glGetUniformLocation(shader.Program, "mCoef");
-		glUniform1f(mixCoef, mCoef); //Se envia al shader el coeficiente del mix	
-
 		shader.USE();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
-		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture"), 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture2"), 1);
-
-		//Controla la rotacion del cubo
-		//rotacion sobre el eje Y
-		if (rotLeft) {
-			rotY += inc;
-		}
-		else if (rotRight) {
-			rotY -= inc;
-		}
-		//rotacion sobre el eje X
-		if (rotUp) {
-			rotX -= inc;
-		}
-		else if (rotDown) {
-			rotX += inc;
-		}
-
-		//controla el intercambio de la textura
-		if (fade) {
-			if (mCoef >= 0 && mCoef < 1) {
-				mCoef += 0.01f;
-			}
-		}
-		else {
-			if (mCoef >0.01f) {
-				mCoef -= 0.01f;
-			}
-		}
-
 		//MOVIMIENTO DE CAMARA
 		cam.DoMovement(window);
 
@@ -249,45 +101,20 @@ int main() {
 		//calculo matriz vista (AQUI VA LA CAMARA)
 		viewMat = cam.LookAt();
 
+		movingBox.Update(window);
+		modelMat = movingBox.GetModelMatrix();
+
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(cam.GetFOV()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
-		glBindVertexArray(VAO);
-		for (int i = 0; i < 10; i++) {
-			//calculo matriz modelo para cada cubo
-			if (i == 0) {
-				modelMat = glm::translate(modelMat, CubesPositionBuffer[i]);
-				modelMat = glm::rotate(modelMat, glm::radians(rotX), glm::vec3(1, 0, 0));
-				modelMat = glm::rotate(modelMat, glm::radians(rotY), glm::vec3(0, 1, 0));
-				modelMat = glm::scale(modelMat,glm::vec3(0.f));
-			}
-			else {
-				float rotation = glfwGetTime() * 100;
-				rotation = (int)rotation % 360;
-				modelMat = modelMatGen(glm::vec3(1.0f), glm::vec3(1.f, 0.5f, 0.f), CubesPositionBuffer[i], rotation);
-			}
-			//calculo de la matriz final
-			finalMat = projectionMat * viewMat * modelMat;
-			//se envia la matriz al shader
-			glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-		//se intenta pintar el modelo de la araña
-		modelMat = modelMatGen(glm::vec3(1), glm::vec3(0), glm::vec3(0), 0);
-		finalMat = projectionMat*viewMat*modelMat;
-		glUniformMatrix4fv(shaderTrans, 1, GL_FALSE, glm::value_ptr(finalMat));
-		spiderModel.Draw(shader, GL_DYNAMIC_DRAW);
 		
-		glBindVertexArray(0);
-		// Swap the screen buffers
+		finalMat = projectionMat*viewMat*modelMat;
+		glUniformMatrix4fv(finalMatID, 1, GL_FALSE, glm::value_ptr(finalMat));
+		movingBox.Draw();
+
+		//modelMat = staticBox.GetModelMatrix();
+
 		glfwSwapBuffers(window);
 	}
-
-	// liberar la memoria de los VAO, EBO y VBO
-	glBindTexture(GL_TEXTURE_2D,0);
-	// Terminate GLFW, clearing any resources allocated by GLFW.
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

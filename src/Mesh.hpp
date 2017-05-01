@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include "..\Shader.h"
+#include "..\Shader.hpp"
 #include <GL\glew.h>
 #include <gtc\matrix_transform.hpp>
 #include <glm.hpp>
