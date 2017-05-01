@@ -491,11 +491,13 @@ glm::mat4 LookAt(glm::vec3 right, glm::vec3 up, glm::vec3 front, glm::vec3 pos) 
 	lookAt[2][1] = front.y;
 	lookAt[2][2] = front.z;
 
-	lookAt[0][3] = -pos.x;
-	lookAt[1][3] = -pos.y;
-	lookAt[2][3] = -pos.z;
+	glm::mat4 translation, res;
+	translation[3][0] = -cameraPos.x;
+	translation[3][1] = -cameraPos.y;
+	translation[3][2] = -cameraPos.z;
 
 	lookAt = glm::transpose(lookAt);
+	lookAt = lookAt * translation;
 
 	return lookAt;
 }
