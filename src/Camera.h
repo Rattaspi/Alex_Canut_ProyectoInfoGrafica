@@ -45,7 +45,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction, GLfloat sensivility, GLf
 void Camera::DoMovement(GLFWwindow* window) {
 	deltaTime = glfwGetTime() - lastFrame;
 	lastFrame = glfwGetTime();
-	float camSpeed = 0.5;
+	float camSpeed = 5;
 
 	//inputs para controlar el movimiento de la camara
 	bool back = glfwGetKey(window, GLFW_KEY_W);
@@ -55,10 +55,10 @@ void Camera::DoMovement(GLFWwindow* window) {
 
 	//movimiento de camara
 	if (back) {
-		cameraPos += cameraFront*camSpeed*deltaTime;
+		cameraPos -= cameraFront*camSpeed*deltaTime;
 	}
 	else if (front) {
-		cameraPos -= cameraFront*camSpeed*deltaTime;
+		cameraPos += cameraFront*camSpeed*deltaTime;
 	}
 
 	if (left) {
@@ -70,7 +70,7 @@ void Camera::DoMovement(GLFWwindow* window) {
 }
 
 void Camera::MouseMove(GLFWwindow* window, double xPos, double yPos) {
-	double offsetX, offsetY;
+	static double offsetX, offsetY;
 
 	//la primera vez se inician las primeras coordenadas del raton para tener
 	//una primera referencia
@@ -96,6 +96,9 @@ void Camera::MouseMove(GLFWwindow* window, double xPos, double yPos) {
 	cameraFront = glm::normalize(front);
 	//nuevo vector right
 	cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraFront));
+
+	lastMX = xPos;
+	lastMY = yPos;
 }
 
 void Camera::MouseScroll(GLFWwindow* window, double xScroll, double yScroll) {

@@ -8,6 +8,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
+#include "Camera.h"
 
 
 using namespace std;
@@ -15,6 +16,7 @@ const GLint WIDTH = 800, HEIGHT = 600;
 bool WIDEFRAME = false;
 bool paintQuad=false;
 
+void DrawVao(GLuint programID, GLuint VAO);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
 glm::mat4 LookAt(glm::vec3, glm::vec3 ,glm::vec3, glm::vec3);
@@ -26,30 +28,9 @@ float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
-glm::vec3 cameraPos, cameraFront, cameraUp, cameraRight; //vectores de la camara
-float cameraSpeed = 20;
-bool movLeft, movRight, movFront, movBack;
-bool doOnce = false; //se utiliza en el mouse callback
-float pitch, yaw, prevMouseX, prevMouseY;
-float sensivilidadMouse = 0.04;
-float FOV = 45; //Field of view
 
-void DrawVao(GLuint programID,GLuint VAO) {
-	//establecer el shader
-	glUseProgram(programID);
+Camera cam(glm::vec3(0, 0, -3), glm::normalize(glm::vec3(0, 0, -3)), 0.04f, 45.0f);
 
-	//pitar el VAO
-	glBindVertexArray(VAO);
-	if (!paintQuad) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}
-	else {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}
-
-}
 int main() {
 	//initGLFW
 	if (!glfwInit())
@@ -210,23 +191,6 @@ int main() {
 	GLint mixCoef;
 	GLint shaderTrans = glGetUniformLocation(s.Program, "finalMat");
 
-	//INICIALIZAR LA COSAS DE LA CAMARA
-	cameraPos = glm::vec3(0.0f, 0.0f, -7.0f);
-
-	cameraFront = glm::normalize(glm::vec3(0, 0, 0) - cameraPos);
-	glm::vec3 dirX, dirY;
-	dirX = glm::normalize(glm::vec3(0, cameraFront.y, cameraFront.z));
-	dirY = glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
-
-	pitch = 90 - glm::degrees(glm::acos(glm::dot(glm::vec3(0, 1, 0), dirX)));
-	yaw = 90 - glm::degrees(glm::acos(glm::dot(dirY, glm::vec3(0,0,1))));
-	
-	cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));
-	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
-	cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-
-	float dt, prevT = 0, currT = 0; // esto es para el delta time
-
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
 	{
@@ -275,33 +239,16 @@ int main() {
 		}
 
 		//MOVIMIENTO DE CAMARA
-		if (movFront) {
-			cameraPos -= cameraFront * cameraSpeed * dt;
-		}
-		else if (movBack) {
-			cameraPos += cameraFront * cameraSpeed * dt;
-		}
-
-		if (movRight) {
-			cameraPos -= cameraRight * cameraSpeed * dt;
-		}
-		else if (movLeft) {
-			cameraPos += cameraRight * cameraSpeed * dt;
-		}
-
-		//CALCULO DELTA TIME
-		currT = glfwGetTime();
-		dt = currT - prevT;
-		prevT = currT;
+		cam.DoMovement(window);
 
 		//proyeccion * vista * modelo
 		glm::mat4 modelMat, viewMat, projectionMat, finalMat;
 
 		//calculo matriz vista (AQUI VA LA CAMARA)
-		viewMat = LookAt(cameraRight, cameraUp, cameraFront, cameraPos);
+		viewMat = cam.LookAt();
 
 		//calculo matriz proyeccion
-		projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
+		projectionMat = glm::perspective(glm::radians(cam.GetFOV()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
 		glBindVertexArray(VAO);
 		for (int i = 0; i < 10; i++) {
 			//calculo matriz modelo para cada cubo
@@ -322,7 +269,6 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		glBindVertexArray(0);
-		//cout << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << endl;
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
@@ -337,6 +283,15 @@ int main() {
 	glfwTerminate();
 
 	exit(EXIT_SUCCESS);
+}
+
+//genera la matriz model
+glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot) {
+	glm::mat4 model;
+	model = glm::translate(model, translate);
+	model = glm::rotate(model, glm::radians(rot), rotate);
+	model = glm::scale(model, scale);
+	return model;
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
@@ -379,125 +334,29 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE) {
 		rotDown = false;
 	}
-
-	//movimiento camara horizontal
-	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-		movLeft = true;
-	}
-	else if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
-		movLeft = false;
-	}
-	else if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-		movRight = true;
-	}
-	else if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
-		movRight = false;
-	}
-
-	//movimiento camara alante y atras
-	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-		movFront = true;
-	}
-	else if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
-		movFront = false;
-	}
-	else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-		movBack = true;
-	}
-	else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-		movBack = false;
-	}
 }
 
 void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
-	double offsetX, offsetY; //coordenadas anteriores y actuales de la posicion del raton
-	glm::vec3 front; //nuevo vector front que tendrá nuestra camara
-	if (!doOnce) {
-		prevMouseX = xPos;
-		prevMouseY = yPos;
-		doOnce = true;
-	}
-
-	offsetX = xPos - prevMouseX;
-	offsetY = yPos - prevMouseY;
-	offsetX *= sensivilidadMouse;
-	offsetY *= sensivilidadMouse;
-
-	yaw += offsetX;
-	pitch -= offsetY;
-	pitch = glm::clamp(pitch, -89.0f, 89.0f);
-	yaw = glm::mod(yaw, 360.f);
-	front.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-	front.y = glm::sin(glm::radians(pitch));
-	front.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
-	cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0,1,0)));
-	cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
-	cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-
-	prevMouseX = xPos;
-	prevMouseY = yPos;
+	cam.MouseMove(window, xPos, yPos);
 }
 
 void Wheel_Callback(GLFWwindow* window, double xOffset, double yOffset) {
-	if (FOV >= 1.0f && FOV <= 60.f) {
-		FOV -= yOffset;
-	}
-	if (FOV <= 1.0f) {
-		FOV = 1.0f;
-	}
-	else if (FOV >= 60.0f) {
-		FOV = 60.0f;
-	}
+	cam.MouseScroll(window, xOffset, yOffset);
 }
 
-glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot) {
-	glm::mat4 model;
-	model = glm::translate(model, translate);
-	model = glm::rotate(model,glm::radians(rot), rotate);
-	model = glm::scale(model, scale);
-	return model;
-}
+void DrawVao(GLuint programID, GLuint VAO) {
+	//establecer el shader
+	glUseProgram(programID);
 
-glm::mat4 LookAt(glm::vec3 right, glm::vec3 up, glm::vec3 front, glm::vec3 pos) {
-	glm::mat4 lookAt;
-	lookAt[3][3] = 1;
+	//pitar el VAO
+	glBindVertexArray(VAO);
+	if (!paintQuad) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+	else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
 
-	//lookAt[0][0] = right.x;
-	//lookAt[1][0] = right.y;
-	//lookAt[2][0] = right.z;
-
-	//lookAt[0][1] = up.x;
-	//lookAt[1][1] = up.y;
-	//lookAt[2][1] = up.z;
-
-	//lookAt[0][2] = front.x;
-	//lookAt[1][2] = front.y;
-	//lookAt[2][2] = front.z;
-
-	//lookAt[3][0] = -pos.x;
-	//lookAt[3][1] = -pos.y;
-	//lookAt[3][2] = -pos.z;
-
-	lookAt[0][0] = right.x;
-	lookAt[0][1] = right.y;
-	lookAt[0][2] = right.z;
-
-	lookAt[1][0] = up.x;
-	lookAt[1][1] = up.y;
-	lookAt[1][2] = up.z;
-
-	lookAt[2][0] = front.x;
-	lookAt[2][1] = front.y;
-	lookAt[2][2] = front.z;
-
-	glm::mat4 translation, res;
-	translation[3][0] = -cameraPos.x;
-	translation[3][1] = -cameraPos.y;
-	translation[3][2] = -cameraPos.z;
-
-	lookAt = glm::transpose(lookAt);
-	lookAt = lookAt * translation;
-
-	return lookAt;
 }
