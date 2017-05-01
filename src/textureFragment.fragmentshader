@@ -11,5 +11,7 @@ uniform sampler2D ourTexture2;
 uniform float mCoef;
 
 void main(){
-	color = mix(texture(ourTexture, TexCoord), texture(ourTexture2, TexCoord), mCoef);
+	//color = mix(texture(ourTexture, TexCoord), texture(ourTexture2, TexCoord), mCoef);
+	//color = texture(ourTexture, TexCoord);
+	color = vec4(1,0,0,1);
 }

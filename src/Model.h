@@ -6,6 +6,7 @@
 #include <assimp\postprocess.h>
 
 class Model {
+public:
 	std::vector<Mesh> meshes;
 	std::string directory;
 

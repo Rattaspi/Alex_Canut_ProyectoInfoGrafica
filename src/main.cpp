@@ -9,14 +9,13 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include "Camera.h"
+#include "Mesh.h"
+#include "Model.h"
 
 
 using namespace std;
 const GLint WIDTH = 800, HEIGHT = 600;
-bool WIDEFRAME = false;
-bool paintQuad=false;
 
-void DrawVao(GLuint programID, GLuint VAO);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
 glm::mat4 LookAt(glm::vec3, glm::vec3 ,glm::vec3, glm::vec3);
@@ -24,7 +23,6 @@ void Mouse_Callback(GLFWwindow*, double, double);
 void Wheel_Callback(GLFWwindow*, double, double);
 
 float mCoef = 0;
-float deg = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
@@ -74,7 +72,7 @@ int main() {
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0);
 
 	//cargamos los shader
-	Shader s = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
+	Shader shader = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 
 	// Definir el buffer de vertices
 	//Reserva de memoria
@@ -189,7 +187,11 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	GLint mixCoef;
-	GLint shaderTrans = glGetUniformLocation(s.Program, "finalMat");
+	GLint shaderTrans = glGetUniformLocation(shader.Program, "finalMat");
+
+	//INSTANCIACION DE LOS OBJETOS 3D
+	Model spiderModel;
+	spiderModel.loadModel("./src/spider/spider.obj");
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -199,16 +201,16 @@ int main() {
 		//Establecer el color de fondo
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mixCoef = glGetUniformLocation(s.Program, "mCoef");
+		mixCoef = glGetUniformLocation(shader.Program, "mCoef");
 		glUniform1f(mixCoef, mCoef); //Se envia al shader el coeficiente del mix	
 
-		s.USE();
+		shader.USE();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
-		glUniform1i(glGetUniformLocation(s.Program, "ourTexture"), 0);
+		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture"), 0);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
-		glUniform1i(glGetUniformLocation(s.Program, "ourTexture2"), 1);
+		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture2"), 1);
 
 		//Controla la rotacion del cubo
 		//rotacion sobre el eje Y
@@ -256,6 +258,7 @@ int main() {
 				modelMat = glm::translate(modelMat, CubesPositionBuffer[i]);
 				modelMat = glm::rotate(modelMat, glm::radians(rotX), glm::vec3(1, 0, 0));
 				modelMat = glm::rotate(modelMat, glm::radians(rotY), glm::vec3(0, 1, 0));
+				modelMat = glm::scale(modelMat,glm::vec3(0.f));
 			}
 			else {
 				float rotation = glfwGetTime() * 100;
@@ -268,6 +271,13 @@ int main() {
 			glUniformMatrix4fv(shaderTrans, 1, false, value_ptr(finalMat));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		//se intenta pintar el modelo de la araña
+		modelMat = modelMatGen(glm::vec3(1), glm::vec3(0), glm::vec3(0), 0);
+		finalMat = projectionMat*viewMat*modelMat;
+		glUniformMatrix4fv(shaderTrans, 1, GL_FALSE, glm::value_ptr(finalMat));
+		spiderModel.Draw(shader, GL_DYNAMIC_DRAW);
+		
 		glBindVertexArray(0);
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
@@ -342,21 +352,4 @@ void Mouse_Callback(GLFWwindow* window, double xPos, double yPos) {
 
 void Wheel_Callback(GLFWwindow* window, double xOffset, double yOffset) {
 	cam.MouseScroll(window, xOffset, yOffset);
-}
-
-void DrawVao(GLuint programID, GLuint VAO) {
-	//establecer el shader
-	glUseProgram(programID);
-
-	//pitar el VAO
-	glBindVertexArray(VAO);
-	if (!paintQuad) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}
-	else {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}
-
 }
