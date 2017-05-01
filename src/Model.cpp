@@ -13,7 +13,7 @@ void Model::Draw(Shader shader, GLint drawMode) {
 		meshes[i].Draw(shader, drawMode);
 }
 
-void Model::loadModel(string path) {
+void Model::loadModel(std::string path) {
 	Assimp::Importer importer;
 	
     //aiProcess_GenNormals : actually creates normals for each vertex if the model didn't contain normal vectors.
@@ -23,7 +23,7 @@ void Model::loadModel(string path) {
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		cout << "ERROR::ASSIMP::" << importer.GetErrorString() << endl;
+		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
 	directory = path.substr(0, path.find_last_of('/'));
@@ -44,14 +44,14 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
-	vector<Vertex> vertices;
-	vector<GLuint> indices;
-	vector<Texture> textures;
+	std::vector<Mesh::Vertex> vertices;
+	std::vector<GLuint> indices;
+	std::vector<Mesh::Texture> textures;
 
 	for (GLuint i = 0; i < mesh->mNumVertices; i++){
-		Vertex vertex;
+		Mesh::Vertex vertex;
 		// Process vertex positions, normals and texture coordinates
-		vec3 vectAux;
+		glm::vec3 vectAux;
 		vectAux.x = mesh->mVertices[i].x;
 		vectAux.y = mesh->mVertices[i].y;
 		vectAux.z = mesh->mVertices[i].z;
@@ -64,7 +64,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 			vertex.Normal = vectAux;
 		}
-		vec2 vec = vec2(0.0f, 0.0f);
+		glm::vec2 vec = glm::vec2(0.0f, 0.0f);
 		if (mesh->mTextureCoords[0]){// Comprobamos que tenga textura
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;	
@@ -81,21 +81,21 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// Process material
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<Mesh::Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		std::vector<Mesh::Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	return Mesh(vertices, indices, textures);
 }
 
-vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
-	vector<Texture> textures;
+std::vector<Mesh::Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName) {
+	std::vector<Mesh::Texture> textures;
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++){
 		aiString str;
 		mat->GetTexture(type, i, &str);
-		Texture texture;
+		Mesh::Texture texture;
 		texture.id = TextureFromFile(str.C_Str(), directory);
 		texture.type = typeName;
 		texture.path = str;
@@ -104,9 +104,9 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
-GLint Model::TextureFromFile(const char* path, string directory){
+GLint Model::TextureFromFile(const char* path, std::string directory) {
 	//Generate texture ID and load texture data 
-	string filename = string(path);
+	std::string filename = std::string(path);
 	filename = directory + '/' + filename;
 	GLuint textureID;
 	glGenTextures(1, &textureID);
