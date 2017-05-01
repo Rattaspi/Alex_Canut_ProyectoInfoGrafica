@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh::Mesh(vector<Vertex> vert, vector<GLuint> ind, vector<Texture> text){
+Mesh::Mesh(std::vector<Vertex> vert, std::vector<GLuint> ind, std::vector<Texture> text) {
 
 	vertices = vert;
 	indices = ind;
@@ -41,9 +41,9 @@ void Mesh::Draw(Shader MeshShader, GLint DrawMode) {
 	for (GLuint i = 0; i < textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); 
-		stringstream ss; //comprueba si hay más de una textura por componente
-		string number;
-		string name = textures[i].type;
+		std::stringstream ss; //comprueba si hay más de una textura por componente
+		std::string number;
+		std::string name = textures[i].type;
 		if (name == "texture_diffuse")
 			ss << diffuseNr++; // concatena en ss el numero de textura difusa que toca EJ: texture_diffise2
 		else if (name == "texture_specular")
