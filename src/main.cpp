@@ -11,7 +11,6 @@
 #include "Camera.hpp"
 #include "Mesh.hpp"
 #include "Model.hpp"
-#include "Object.hpp"
 
 
 using namespace std;
@@ -19,7 +18,7 @@ const GLint WIDTH = 800, HEIGHT = 600;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 glm::mat4 modelMatGen(glm::vec3 scale, glm::vec3 rotate, glm::vec3 translate, float rot);
-glm::mat4 LookAt(glm::vec3, glm::vec3 ,glm::vec3, glm::vec3);
+glm::mat4 LookAt(glm::vec3, glm::vec3, glm::vec3, glm::vec3);
 void Mouse_Callback(GLFWwindow*, double, double);
 void Wheel_Callback(GLFWwindow*, double, double);
 
@@ -27,6 +26,7 @@ float mCoef = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
+int modelToDraw;
 
 Camera cam(glm::vec3(0, 0, -3), glm::normalize(glm::vec3(0, 0, -3)), 0.04f, 45.0f);
 
@@ -70,17 +70,102 @@ int main() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//fondo
-	glClearColor(0.f, 0.f, 0.f, 1.0);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0);
 
 	//cargamos los shader
 	Shader shader = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
+
+	// Definir el buffer de vertices
+	//Reserva de memoria
+	GLfloat VertexBufferCube[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		0.5f , -0.5f, -0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 1.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f , -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f , -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f , -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f , -0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	glm::vec3 CubesPositionBuffer[] = {
+		glm::vec3(0.0f ,  0.0f,  0.0f),
+		glm::vec3(2.0f ,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f , -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f , -2.0f, -2.5f),
+		glm::vec3(1.5f ,  2.0f, -2.5f),
+		glm::vec3(1.5f ,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 	glEnable(GL_DEPTH_TEST);
 
-	//se instancian las dos cajas
-	Object movingBox(glm::vec3(0.5f,0.5f,0.5f),glm::vec3(0),glm::vec3(0),Object::cube);
-	Object staticBox(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(4.f, 0.f, 0.f), Object::cube);
+	GLuint VAO, EBO, VBO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO); {
 
-	GLint finalMatID = glGetUniformLocation(shader.Program, "finalMat");
+		glGenBuffers(1, &VBO);
+		//Se enlaza el buffer para poder usarlo
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		//Se pasan los datos
+		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_DYNAMIC_DRAW);
+
+		//Propiedades
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)0);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 0, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	}glBindVertexArray(0);
+
+	GLint shaderTrans = glGetUniformLocation(shader.Program, "finalMat");
+
+	//INSTANCIACION DE LOS OBJETOS 3D
+	Model spiderModel("./src/spider/spider.obj");
+	Model model2("./src/spider/box.obj");
+	Model model3("./src/spider/WusonOBJ.obj");
+	modelToDraw = 0;
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -89,7 +174,9 @@ int main() {
 		glfwPollEvents();
 		//Establecer el color de fondo
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		shader.USE();
+		glBindVertexArray(VAO);
 		//MOVIMIENTO DE CAMARA
 		cam.DoMovement(window);
 
@@ -99,25 +186,48 @@ int main() {
 		//calculo matriz vista (AQUI VA LA CAMARA)
 		viewMat = cam.LookAt();
 
-		movingBox.Update(window);
-		modelMat = movingBox.GetModelMatrix();
-
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(cam.GetFOV()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
-		
-		finalMat = projectionMat*viewMat*modelMat;
-		glUniformMatrix4fv(finalMatID, 1, GL_FALSE, glm::value_ptr(finalMat));
-		movingBox.Draw();
+	
+		//inputs para cambios de modelo
+		if (glfwGetKey(window, GLFW_KEY_1)) modelToDraw = 0;
+		else if (glfwGetKey(window, GLFW_KEY_2)) modelToDraw = 1;
+		else if (glfwGetKey(window, GLFW_KEY_3)) modelToDraw = 2;
 
-		modelMat = staticBox.GetModelMatrix();
-		finalMat = projectionMat*viewMat*modelMat;
-		glUniformMatrix4fv(finalMatID, 1, GL_FALSE, glm::value_ptr(finalMat));
-		staticBox.Draw();
+		//se pintan los modelos
+		switch (modelToDraw) {
+		case 0:
+			modelMat = glm::scale(modelMat, glm::vec3(0.01f));
+			finalMat = projectionMat*viewMat*modelMat;
+			glUniformMatrix4fv(shaderTrans, 1, GL_FALSE, glm::value_ptr(finalMat));
+			spiderModel.Draw(shader, GL_DYNAMIC_DRAW);
+			break;
+			
+		case 1:
+			finalMat = projectionMat*viewMat*modelMat;
+			glUniformMatrix4fv(shaderTrans, 1, GL_FALSE, glm::value_ptr(finalMat));
+			model2.Draw(shader, GL_STATIC_DRAW);
+			break;
 
-		//modelMat = staticBox.GetModelMatrix();
+		case 2:
+			finalMat = projectionMat*viewMat*modelMat;
+			glUniformMatrix4fv(shaderTrans, 1, GL_FALSE, glm::value_ptr(finalMat));
+			model3.Draw(shader, GL_STATIC_DRAW);
+			break;
 
+		default:
+			break;
+		}
+		glBindVertexArray(0);
+		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
+
+	// liberar la memoria de los VAO, EBO y VBO
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// Terminate GLFW, clearing any resources allocated by GLFW.
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

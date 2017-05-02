@@ -48,4 +48,12 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\textureFragment.fragmentshader">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="src\textureVertex.vertexshader">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+  </ItemGroup>
 </Project>

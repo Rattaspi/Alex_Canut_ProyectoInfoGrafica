@@ -32,6 +32,10 @@
     <ClInclude Include="src\Model.hpp" />
     <ClInclude Include="src\Object.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\textureFragment.fragmentshader" />
+    <None Include="src\textureVertex.vertexshader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3FC640D2-EFA2-403C-A406-DF29A85CFD5D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
