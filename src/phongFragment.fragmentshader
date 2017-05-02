@@ -1,0 +1,29 @@
+#version 330 core
+out vec4 color;
+
+in vec4 normal;
+in vec4 position;
+
+uniform float luzAmbiental;
+uniform vec3 cameraPos;
+uniform vec3 incidenciaLuz;
+uniform float intensidadDifusa;
+uniform float coeficienteReflexionDifuso;
+uniform float intensidadEspecular;
+uniform float coeficienteReflexionEspecular;
+uniform float roughness;
+uniform float atenuacion;
+
+void main(){
+	color = vec4(0,0,1,1);
+	vec4 Lamb;
+	vec4 Ldif;
+	vec4 Lspec;
+
+	Lamb = color * luzAmbiental;
+	Ldif = color * (intensidadDifusa * coeficienteReflexionDifuso * dot(incidenciaLuz, normal.xyz));
+	vec3 R = 2 * dot(incidenciaLuz, normal.xyz) * normal.xyz - incidenciaLuz;
+	Lspec = color * (intensidadEspecular * coeficienteReflexionEspecular * pow(dot(R, cameraPos),roughness);
+	color = atenuacion * (Lamb + Ldif + Lspec);
+	//color = vec4(0,0,1,1);
+}

@@ -3,13 +3,10 @@
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 n;
-layout(location = 2) in vec2 tex;
+//layout(location = 2) in vec2 tex;
 
 uniform mat4 finalMat;
 
-out vec2 TexCoord;
-
 void main(){
 	gl_Position = finalMat * (vec4((pos),1));
-	TexCoord = tex;
 }

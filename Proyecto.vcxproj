@@ -26,6 +26,7 @@
     <ClCompile Include="src\Object.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="src\Camera.hpp" />
     <ClInclude Include="src\Mesh.hpp" />
@@ -33,8 +34,13 @@
     <ClInclude Include="src\Object.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\phongFragment.fragmentshader" />
+    <None Include="src\phongVertex.vertexshader" />
     <None Include="src\textureFragment.fragmentshader" />
     <None Include="src\textureVertex.vertexshader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Practica1.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3FC640D2-EFA2-403C-A406-DF29A85CFD5D}</ProjectGuid>

@@ -58,6 +58,7 @@ Object::Object(vec3 scale, vec3 rotation, vec3 position, FigureType typef) {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+		glEnableVertexAttribArray(1);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}glBindVertexArray(0);
@@ -95,10 +96,10 @@ void Object::Update(GLFWwindow* window) {
 		position.y -= inc*dt;
 	}
 	if (right) {
-		position.x += inc*dt;
+		position.x -= inc*dt;
 	}
 	else if (left) {
-		position.x -= inc*dt;
+		position.x += inc*dt;
 	}
 
 	//rotacion
@@ -119,9 +120,6 @@ void Object::Update(GLFWwindow* window) {
 	else if (rotYMin) {
 		rotY -= inc * 15 * dt;
 	}
-	
-
-
 }
 
 void Object::Draw() {

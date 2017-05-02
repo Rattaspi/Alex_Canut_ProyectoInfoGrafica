@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{81ec9d38-3039-4a18-a462-17aad2c8101d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -47,13 +50,27 @@
     <ClInclude Include="Shader.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\textureFragment.fragmentshader">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="src\textureVertex.vertexshader">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Shaders</Filter>
     </None>
+    <None Include="src\phongFragment.fragmentshader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\phongVertex.vertexshader">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Practica1.rc">
+      <Filter>Archivos de recursos</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
