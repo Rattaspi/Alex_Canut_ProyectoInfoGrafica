@@ -76,8 +76,6 @@ int main() {
 	Shader shader = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 	glEnable(GL_DEPTH_TEST);
 
-	GLint shaderTrans = glGetUniformLocation(shader.Program, "finalMat");
-
 	//se instancian las dos cajas
 	Object movingBox(glm::vec3(0.5f,0.5f,0.5f),glm::vec3(0),glm::vec3(0),Object::cube);
 	Object staticBox(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(4.f, 0.f, 0.f), Object::cube);
@@ -110,6 +108,11 @@ int main() {
 		finalMat = projectionMat*viewMat*modelMat;
 		glUniformMatrix4fv(finalMatID, 1, GL_FALSE, glm::value_ptr(finalMat));
 		movingBox.Draw();
+
+		modelMat = staticBox.GetModelMatrix();
+		finalMat = projectionMat*viewMat*modelMat;
+		glUniformMatrix4fv(finalMatID, 1, GL_FALSE, glm::value_ptr(finalMat));
+		staticBox.Draw();
 
 		//modelMat = staticBox.GetModelMatrix();
 
