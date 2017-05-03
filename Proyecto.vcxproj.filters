@@ -67,6 +67,15 @@
     <None Include="src\phongVertex.vertexshader">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="src\directionalLight.fragmentshader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\pointLight.fragmentshader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\focalLight.fragmentshader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Practica1.rc">

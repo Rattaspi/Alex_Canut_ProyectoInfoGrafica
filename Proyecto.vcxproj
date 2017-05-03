@@ -34,8 +34,11 @@
     <ClInclude Include="src\Object.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\directionalLight.fragmentshader" />
+    <None Include="src\focalLight.fragmentshader" />
     <None Include="src\phongFragment.fragmentshader" />
     <None Include="src\phongVertex.vertexshader" />
+    <None Include="src\pointLight.fragmentshader" />
     <None Include="src\textureFragment.fragmentshader" />
     <None Include="src\textureVertex.vertexshader" />
   </ItemGroup>

@@ -75,6 +75,10 @@ int main() {
 	//cargamos los shader
 	Shader shader = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 	Shader phongShader = Shader("./src/phongVertex.vertexshader", "./src/phongFragment.fragmentshader");
+	Shader directionalShader = Shader("./src/phongVertex.vertexshader", "./src/directionalLight.fragmentshader");
+	Shader pointShader = Shader("./src/phongVertex.vertexshader", "./src/pointLight.fragmentshader");
+	Shader focalShader = Shader("./src/phongVertex.vertexshader", "./src/focalLight.fragmentshader");
+
 	glEnable(GL_DEPTH_TEST);
 
 	//se instancian las dos cajas
@@ -82,6 +86,7 @@ int main() {
 	Object staticBox(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(4.f, 0.f, 0.f), Object::cube);
 
 	GLint finalMatID = glGetUniformLocation(shader.Program, "finalMat");
+	int shaderSelected = 0;
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -101,20 +106,46 @@ int main() {
 		viewMat = cam.LookAt();
 
 		movingBox.Update(window);
-		
+
 
 		//calculo matriz proyeccion
 		projectionMat = glm::perspective(glm::radians(cam.GetFOV()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
 
 		//se pintan los dos cubos
-		
-		
 		//cubo que se va a iluminar y se puede mover
-		phongShader.USE();
+		//cambio de shader de iluminacion
+		bool directional = glfwGetKey(window, GLFW_KEY_1);
+		bool point = glfwGetKey(window, GLFW_KEY_2);
+		bool focal = glfwGetKey(window, GLFW_KEY_3);
+
+		
+		if (glfwGetKey(window, GLFW_KEY_1)) shaderSelected = 1;
+		else if (glfwGetKey(window, GLFW_KEY_2)) shaderSelected = 2;
+		else if (glfwGetKey(window, GLFW_KEY_3)) shaderSelected = 3;
+		else if (glfwGetKey(window, GLFW_KEY_0)) shaderSelected = 0;
+		if (shaderSelected == 1) {
+			directionalShader.USE();
+			std::cout << "luz direccional" << std::endl;
+		}
+		else if (shaderSelected == 2) {
+			pointShader.USE();
+			std::cout << "luz puntual" << std::endl;
+		}
+		else if (shaderSelected == 3) {
+			focalShader.USE();
+			std::cout << "luz focal" << std::endl;
+		}
+		else {
+			phongShader.USE();
+			std::cout << "phong normal" << std::endl;
+		}
 		//matrices de transformacion
 		modelMat = movingBox.GetModelMatrix();
 		finalMat = projectionMat*viewMat*modelMat;
 		glUniformMatrix4fv(glGetUniformLocation(phongShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
+		glUniformMatrix4fv(glGetUniformLocation(directionalShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
+		glUniformMatrix4fv(glGetUniformLocation(pointShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
+		glUniformMatrix4fv(glGetUniformLocation(focalShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
 		//luces
 		//AMBIENTAL
 		float intensidadAmbiental = 0.5;
@@ -131,7 +162,7 @@ int main() {
 
 		float c1, c2, c3;
 		c1 = 1.0f;
-		c2 = 0.22f; 
+		c2 = 0.22f;
 		c3 = 0.2f;
 		float factorAtenuacion = 1 / (1 + c2*(incidenciaLuz.length()) + c3*(incidenciaLuz.length() * incidenciaLuz.length()));
 
@@ -145,17 +176,7 @@ int main() {
 		glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionEspecular"), coeficienteReflexionEspecular);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "roughness"), roughness);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "atenuacion"), factorAtenuacion);
-
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "iluminacionAmbiental"), luzAmbiental);
-		//glUniform3f(glGetUniformLocation(phongShader.Program, "camPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
-		//glUniform3f(glGetUniformLocation(phongShader.Program, "incidenciaLuz"), incidenciaLuz.x, incidenciaLuz.y, incidenciaLuz.z);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadFuenteDifusa"), intensidadDifusa);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteDifuso"), coeficienteReflexionDifuso);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadFuenteEspecular"), intensidadEspecular);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteEspecular"), coeficienteReflexionEspecular);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "rugosidad"), roughness);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "factorAtenuacion"), factorAtenuacion);
-
+		//se pinta la caja
 		movingBox.Draw();
 
 		//cubo estatico
@@ -164,13 +185,9 @@ int main() {
 		finalMat = projectionMat*viewMat*modelMat;
 		glUniformMatrix4fv(finalMatID, 1, GL_FALSE, glm::value_ptr(finalMat));
 		staticBox.Draw();
-		
-
-		//modelMat = staticBox.GetModelMatrix();
 
 		glfwSwapBuffers(window);
 	}
-
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
