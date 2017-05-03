@@ -16,14 +16,17 @@ uniform float atenuacion;
 
 void main(){
 	color = vec4(0,0,1,1);
-	vec4 Lamb;
-	vec4 Ldif;
-	vec4 Lspec;
+	vec4 color2 = vec4(0,0,1,1);
+	vec4 Ldif = vec4(0,0,0,0);
+	vec4 Lspec = vec4(0,0,0,0);
+	vec4 normalNormal = normalize(normal);
 
-	Lamb = color * luzAmbiental;
-	Ldif = color * (intensidadDifusa * coeficienteReflexionDifuso * dot(incidenciaLuz, normal.xyz));
-	vec3 R = 2 * dot(incidenciaLuz, normal.xyz) * normal.xyz - incidenciaLuz;
-	Lspec = color * (intensidadEspecular * coeficienteReflexionEspecular * pow(dot(R, cameraPos),roughness);
+	//color especular blanco y los demas en azul.
+
+	vec4 Lamb = color2 * luzAmbiental;
+	Ldif = color2 * (intensidadDifusa * coeficienteReflexionDifuso * dot(normalize(incidenciaLuz), normalNormal.xyz));
+	vec3 R = 2 * dot(incidenciaLuz, normalNormal.xyz) * normalNormal.xyz - normalize(incidenciaLuz);
+	Lspec = color * (intensidadEspecular * coeficienteReflexionEspecular * pow(dot(R, cameraPos), roughness));
 	color = atenuacion * (Lamb + Ldif + Lspec);
 	//color = vec4(0,0,1,1);
 }
