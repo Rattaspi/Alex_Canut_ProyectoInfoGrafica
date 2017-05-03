@@ -5,6 +5,39 @@ in vec4 normal;
 
 out vec4 color;
 
+uniform vec3 focoPos;
+uniform vec3 camPos;
+uniform float luzDifusa;
+uniform float luzAmbiental;
+uniform float luzEspecular;
+uniform float roughness;
+
 void main(){
-	color = vec4(0,1,0,1);
+	color = vec4(0,0,1,1);
+	vec4 white = vec4(1,1,1,1);
+	float c1, c2, c3;
+	c1 = 1.0f;
+	c2 = 0.14f;
+	c3 = 0.07f;
+	vec3 normalNormal = normalize(normal).xyz;
+	
+	//atenuacion
+	float distance = length(focoPos - position.xyz);
+	float atenuacion = 1 / (c1 + c2*distance + c3*distance*distance);
+	
+	//ambiental
+	vec4 ambiental = luzAmbiental * color;
+
+	//difusa
+	vec3 L = normalize(focoPos - position.xyz);
+	float diff = max(dot(normalNormal, L),0);
+	vec4 difusa = luzDifusa * diff * color;
+
+	//especular
+	vec3 V = normalize(camPos - position.xyz);
+	vec3 R = reflect(-L, normalNormal.xyz);
+	float esp = pow(max(dot(R,V),0), roughness);
+	vec4 especular = luzEspecular * esp * white;
+
+	color = atenuacion * (ambiental + difusa + especular);
 }

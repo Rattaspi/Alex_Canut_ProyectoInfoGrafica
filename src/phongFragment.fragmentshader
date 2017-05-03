@@ -24,9 +24,9 @@ void main(){
 	//color especular blanco y los demas en azul.
 
 	vec4 Lamb = color2 * luzAmbiental;
-	Ldif = color2 * (intensidadDifusa * coeficienteReflexionDifuso * dot(normalize(incidenciaLuz), normalNormal.xyz));
+	Ldif = color2 * (intensidadDifusa * dot(normalize(incidenciaLuz), normalNormal.xyz));
 	vec3 R = 2 * dot(incidenciaLuz, normalNormal.xyz) * normalNormal.xyz - normalize(incidenciaLuz);
-	Lspec = color * (intensidadEspecular * coeficienteReflexionEspecular * pow(dot(R, cameraPos), roughness));
+	Lspec = color * (intensidadEspecular * pow(dot(R, cameraPos), roughness));
 	color = atenuacion * (Lamb + Ldif + Lspec);
 	//color = vec4(0,0,1,1);
 }
