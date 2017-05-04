@@ -28,7 +28,7 @@ bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotand
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
 
-Camera cam(glm::vec3(0, 0, -3), glm::normalize(glm::vec3(0, 0, -3)), 0.04f, 45.0f);
+Camera cam(glm::vec3(0, 0, 3), glm::normalize(glm::vec3(0, 0, 3)), 0.04f, 45.0f);
 
 int main() {
 	//initGLFW
@@ -114,11 +114,6 @@ int main() {
 		//se pintan los dos cubos
 		//cubo que se va a iluminar y se puede mover
 		//cambio de shader de iluminacion
-		bool directional = glfwGetKey(window, GLFW_KEY_1);
-		bool point = glfwGetKey(window, GLFW_KEY_2);
-		bool focal = glfwGetKey(window, GLFW_KEY_3);
-
-		
 		if (glfwGetKey(window, GLFW_KEY_1)) shaderSelected = 1;
 		else if (glfwGetKey(window, GLFW_KEY_2)) shaderSelected = 2;
 		else if (glfwGetKey(window, GLFW_KEY_3)) shaderSelected = 3;
@@ -144,17 +139,17 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(focalShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
 		//luces
 		//AMBIENTAL
-		float intensidadAmbiental = 0.2;
-		float coeficienteReflexionAmbiental = 0.5f;
+		float intensidadAmbiental = 0.5;
+		float coeficienteReflexionAmbiental = 1.f;
 		float luzAmbiental = intensidadAmbiental * coeficienteReflexionAmbiental;
 		//DIFUSA
-		glm::vec3 incidenciaLuz = glm::normalize(glm::vec3(1, 2, 0));
+		glm::vec3 incidenciaLuz = glm::normalize(glm::vec3(-1, 0, 0));
 		float intensidadDifusa = 0.8f;
 		float coeficienteReflexionDifuso = 0.7f;
 		//ESPECULAR
 		float intensidadEspecular = 0.2f;
-		float coeficienteReflexionEspecular = 0.2f;
-		float roughness = 0.5f;
+		float coeficienteReflexionEspecular = 1.f;
+		float roughness = 1.f;
 
 		float c1, c2, c3;
 		c1 = 1.0f;

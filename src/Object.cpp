@@ -96,10 +96,10 @@ void Object::Update(GLFWwindow* window) {
 		position.y -= inc*dt;
 	}
 	if (right) {
-		position.x -= inc*dt;
+		position.x += inc*dt;
 	}
 	else if (left) {
-		position.x += inc*dt;
+		position.x -= inc*dt;
 	}
 
 	//rotacion
