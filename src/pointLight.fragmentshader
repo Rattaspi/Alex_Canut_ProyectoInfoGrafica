@@ -7,68 +7,38 @@ out vec4 color;
 
 uniform vec3 focoPos;
 uniform vec3 camPos;
-uniform float luzDifusa;
-uniform float luzAmbiental;
-uniform float luzEspecular;
+uniform vec3 luzDifusa;
+uniform vec3 luzAmbiental;
+uniform vec3 luzEspecular;
 uniform float roughness;
 uniform mat4 finalMat;
 
+
 void main(){
-/*
-	color = vec4(0,0,1,1);
-	vec4 white = vec4(1,1,1,1);
-	float c1, c2, c3;
-	c1 = 1.0f;
-	c2 = 0.14f;
-	c3 = 0.07f;
-	
-	//atenuacion
-	float distance = length((finalMat*vec4(focoPos,1)) - position.xyz);
-	float atenuacion = 1 / (c1 + c2*distance + c3*distance*distance);
-	
+	vec3 colorOriginal = vec3(0,0,1);
 	//ambiental
-	vec4 ambiental = luzAmbiental * color;
+	vec4 ambiental = vec4(luzAmbiental * colorOriginal,1);
 
 	//difusa
-	//vec3 L = normalize((finalMat*vec4(focoPos,1)).xyz - position.xyz);
 	vec3 L = normalize(focoPos - position.xyz);
 	float diff = max(dot(normal.xyz, L), 0);
-	vec4 difusa = luzDifusa * diff * color;
+	vec4 difusa = vec4(luzDifusa * diff * colorOriginal,1);
 
 	//especular
 	vec3 V = normalize(camPos - position.xyz);
 	vec3 R = reflect(-L, normal.xyz);
 	float esp = max(dot(R,V), 0);
 	esp = pow(esp, roughness);
-	vec4 especular = luzEspecular * esp * white;
+	vec4 especular =vec4( luzEspecular * esp ,1);
 
-	color =  (ambiental + difusa + especular);
-	*/
-	
-	vec4 colorOriginal = vec4(1,0,0,1);
-	vec4 focusPositionModel = finalMat*vec4(focoPos.xyz,1);
-	vec3 lightDir = normalize(focusPositionModel.xyz - position.xyz);
-
-    // Diffuse shading
-    float diff = max(dot(normal.xyz, lightDir), 0.0);
-
-    // Specular shading
-    vec3 reflectDir = reflect(-lightDir, normal.xyz);
-    float spec = pow(max(dot(camPos, reflectDir), 0.0), roughness);
-
-    // Attenuation
-    float distance = length(focusPositionModel.xyz - position);
+	//atenuacion
 	float c1, c2, c3;
 	c1 = 1.0f;
-	c2 = 0.14f;
-	c3 = 0.07f;
-	float factorAtenuacion = 1 / (c1 + c2*distance + c3*distance*distance);
-
-    // Combine results
-    vec3 diffuse  = lightDir *factorAtenuacion  * diff * colorOriginal.xyz;
-    vec3 specular = spec * factorAtenuacion * luzEspecular * colorOriginal.xyz;
-    vec3 ambient  = luzAmbiental * colorOriginal.xyz;
+	c2 = 0.045;
+	c3 = 0.0075f;
+	float d = length(focoPos - position.xyz);
+	float factorAtenuacion = 1 / (1 + c2*d + c3*(d*d));
 
 
-	color = vec4(ambient+diffuse+specular,1);
+	color = factorAtenuacion * (ambiental + difusa + especular);
 }

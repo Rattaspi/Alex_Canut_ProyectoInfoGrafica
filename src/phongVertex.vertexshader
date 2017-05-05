@@ -10,7 +10,7 @@ uniform mat4 finalMat;
 
 void main(){
 	gl_Position = finalMat * vec4(pos,1);
-	position = vec4(pos,1);
+	position = modelMat * vec4(pos,1);
 	normal.xyz = mat3(transpose(inverse(modelMat))) * n;
 	normal = normalize(normal);
 }
