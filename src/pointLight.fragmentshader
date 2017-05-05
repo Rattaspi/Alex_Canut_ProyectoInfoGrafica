@@ -14,6 +14,7 @@ uniform float roughness;
 uniform mat4 finalMat;
 
 void main(){
+/*
 	color = vec4(0,0,1,1);
 	vec4 white = vec4(1,1,1,1);
 	float c1, c2, c3;
@@ -42,4 +43,32 @@ void main(){
 	vec4 especular = luzEspecular * esp * white;
 
 	color =  (ambiental + difusa + especular);
+	*/
+	
+	vec4 colorOriginal = vec4(1,0,0,1);
+	vec4 focusPositionModel = finalMat*vec4(focoPos.xyz,1);
+	vec3 lightDir = normalize(focusPositionModel.xyz - position.xyz);
+
+    // Diffuse shading
+    float diff = max(dot(normal.xyz, lightDir), 0.0);
+
+    // Specular shading
+    vec3 reflectDir = reflect(-lightDir, normal.xyz);
+    float spec = pow(max(dot(camPos, reflectDir), 0.0), roughness);
+
+    // Attenuation
+    float distance = length(focusPositionModel.xyz - position);
+	float c1, c2, c3;
+	c1 = 1.0f;
+	c2 = 0.14f;
+	c3 = 0.07f;
+	float factorAtenuacion = 1 / (c1 + c2*distance + c3*distance*distance);
+
+    // Combine results
+    vec3 diffuse  = lightDir *factorAtenuacion  * diff * colorOriginal.xyz;
+    vec3 specular = spec * factorAtenuacion * luzEspecular * colorOriginal.xyz;
+    vec3 ambient  = luzAmbiental * colorOriginal.xyz;
+
+
+	color = vec4(ambient+diffuse+specular,1);
 }

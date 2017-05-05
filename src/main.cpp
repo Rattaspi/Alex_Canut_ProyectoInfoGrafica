@@ -154,7 +154,7 @@ int main() {
 		float c1, c2, c3;
 		c1 = 1.0f;
 		c2 = 0.22f;
-		c3 = 0.2f;
+		c3 = 0.02f;
 		float factorAtenuacion = 1 / (1 + c2*(incidenciaLuz.length()) + c3*(incidenciaLuz.length() * incidenciaLuz.length()));
 
 		glm::vec3 focusPos = staticBox.GetPosition();
