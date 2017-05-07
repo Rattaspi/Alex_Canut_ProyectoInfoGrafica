@@ -86,7 +86,7 @@ int main() {
 	Object staticBox(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(4.f, 0.f, 0.f), Object::cube);
 
 	GLint finalMatID = glGetUniformLocation(shader.Program, "finalMat");
-	int shaderSelected = 0;
+	int shaderSelected = 3;
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -118,6 +118,7 @@ int main() {
 		else if (glfwGetKey(window, GLFW_KEY_2)) shaderSelected = 2;
 		else if (glfwGetKey(window, GLFW_KEY_3)) shaderSelected = 3;
 		else if (glfwGetKey(window, GLFW_KEY_0)) shaderSelected = 0;
+
 		if (shaderSelected == 1) {
 			directionalShader.USE();
 		}
@@ -163,13 +164,15 @@ int main() {
 	
 		float factorAtenuacion = 1 / (1 + c2*(incidenciaLuz.length()) + c3*(incidenciaLuz.length() * incidenciaLuz.length()));
 
+		//componentes del foco
+		glm::vec3 focoFront(-1, 0, 0);
 
 		glm::vec3 focusPos = staticBox.GetPosition();
 
 		//enviar datos de iluminacion al shader de phong
 		glUniformMatrix4fv(glGetUniformLocation(phongShader.Program, "modelMat"),1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
 		glUniform3f(glGetUniformLocation(phongShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
-		glUniform3f(glGetUniformLocation(phongShader.Program, "cameraPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
+		glUniform3f(glGetUniformLocation(phongShader.Program, "cameraPos"), cam.GetPosition().x, cam.GetPosition().y, cam.GetPosition().z);
 		glUniform3f(glGetUniformLocation(phongShader.Program, "incidenciaLuz"), incidenciaLuz.x, incidenciaLuz.y, incidenciaLuz.z);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadDifusa"), intensidadDifusa);
 		//glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionDifuso"), coeficienteReflexionDifuso);
@@ -182,11 +185,24 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(directionalShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
 		glUniform3f(glGetUniformLocation(phongShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
 		glUniform3f(glGetUniformLocation(directionalShader.Program, "direccionLuz"), incidenciaLuz.x, incidenciaLuz.y, incidenciaLuz.z);
-		glUniform3f(glGetUniformLocation(directionalShader.Program, "camPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
+		glUniform3f(glGetUniformLocation(directionalShader.Program, "camPos"), cam.GetPosition().x, cam.GetPosition().y, cam.GetPosition().z);
 		glUniform3f(glGetUniformLocation(directionalShader.Program, "focusPos"), focusPos.x, focusPos.y, focusPos.z);
 		glUniform1f(glGetUniformLocation(directionalShader.Program, "roughness"), roughness);
 		glUniform1f(glGetUniformLocation(directionalShader.Program, "luzDifusa"), intensidadDifusa);
 		glUniform1f(glGetUniformLocation(directionalShader.Program, "luzEspecular"), intensidadEspecular);
+
+		//enviar datos de iluminacion al shader de luz focal
+		glUniformMatrix4fv(glGetUniformLocation(focalShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
+		glUniform3f(glGetUniformLocation(pointShader.Program, "focoPos"), focusPos.x, focusPos.y, focusPos.z);
+		glUniform3f(glGetUniformLocation(pointShader.Program, "luzDifusa"), luzDifusa.x, luzDifusa.y, luzDifusa.z);
+		glUniform3f(glGetUniformLocation(pointShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
+		glUniform3d(glGetUniformLocation(pointShader.Program, "luzEspecular"), luzEspecular.x, luzEspecular.y, luzEspecular.z);
+		glUniform3f(glGetUniformLocation(pointShader.Program, "camPos"), cam.GetPosition().x, cam.GetPosition().y, cam.GetPosition().z);
+		glUniform1d(glGetUniformLocation(pointShader.Program, "roughness"), roughness);
+		glUniform3f(glGetUniformLocation(focalShader.Program, "direccionFoco"), focoFront.x, focoFront.y, focoFront.z);
+		glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMax"), cos(radians(45.0f)));
+		glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMin"), cos(radians(20.0f)));
+
 
 		//enviar datos de iluminacion al shader de luz puntual
 		glUniformMatrix4fv(glGetUniformLocation(pointShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
@@ -194,13 +210,11 @@ int main() {
 		glUniform3f(glGetUniformLocation(pointShader.Program, "luzDifusa"), luzDifusa.x, luzDifusa.y, luzDifusa.z);
 		glUniform3f(glGetUniformLocation(pointShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
 		glUniform3d(glGetUniformLocation(pointShader.Program, "luzEspecular"), luzEspecular.x, luzEspecular.y, luzEspecular.z);
-		glUniform3f(glGetUniformLocation(pointShader.Program, "camPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
+		glUniform3f(glGetUniformLocation(pointShader.Program, "camPos"), cam.GetPosition().x, cam.GetPosition().y, cam.GetPosition().z);
 		glUniform1d(glGetUniformLocation(pointShader.Program, "roughness"), roughness);
 		//glUniform1f(glGetUniformLocation(pointShader.Program, "atenuacion"), factorAtenuacion);
 
-		//enviar datos de iluminacion al shader de luz focal
-		glUniformMatrix4fv(glGetUniformLocation(focalShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
-
+		
 		
 		//se pinta la caja
 		movingBox.Draw();

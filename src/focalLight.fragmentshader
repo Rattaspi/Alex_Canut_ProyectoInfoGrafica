@@ -5,6 +5,98 @@ in vec4 normal;
 
 out vec4 color;
 
+uniform vec3 focoPos;
+uniform vec3 camPos;
+uniform vec3 luzDifusa;
+uniform vec3 luzAmbiental;
+uniform vec3 luzEspecular;
+uniform float roughness;
+
+uniform vec3 direccionFoco;
+uniform float aperturaMax;
+uniform float aperturaMin;
+
 void main(){
-	color = vec4(0,0,1,1);
+	vec3 colorOriginal = vec3(0,0,1);
+	//ambiental
+	vec4 ambiental = vec4(luzAmbiental * colorOriginal,1);
+
+	//difusa
+	vec3 L = normalize(focoPos - position.xyz);
+	float diff = max(dot(normal.xyz, L), 0);
+	vec4 difusa = vec4(luzDifusa * diff * colorOriginal,1);
+
+	//especular
+	vec3 V = normalize(camPos - position.xyz);
+	vec3 R = reflect(-L, normal.xyz);
+	float esp = max(dot(R,V), 0);
+	esp = pow(esp, roughness);
+	vec4 especular =vec4( luzEspecular * esp * vec3(1,1,1) ,1);
+
+	//atenuacion
+	float c1, c2, c3;
+	c1 = 1.0f;
+	c2 = 0.045;
+	c3 = 0.0075f;
+	float d = length(focoPos - position.xyz);
+	float factorAtenuacion = 1 / (1 + c2*d + c3*(d*d));
+
+	//comportamiento foco
+	vec3 incidenciaLuz = normalize(focoPos - position.xyz);
+	float theta = dot(incidenciaLuz, normalize(-direccionFoco));
+
+	if(theta > aperturaMax){
+		float epsilon = aperturaMin - aperturaMax;
+		float inter = clamp((theta - aperturaMax)/ epsilon, 0, 1);
+		color = inter*factorAtenuacion*(ambiental + especular + difusa);
+	}else{
+		color = factorAtenuacion*ambiental;
+	}
+
+
+/*
+	vec4 iluminacionDifusa;
+	vec4 iluminacionEspecular;
+	vec4 colorOriginal = vec4(0,0,1,1);
+	
+
+	float d = length(focusPosition - position.xyz);
+	float c1, c2, c3;
+	c1 = 1.0f;
+	c2 = 0.045;
+	c3 = 0.0075f;
+	float factorAtenuacion = 1 / (1 + c2*d + c3*d*d);
+	   
+
+	vec3 incidenciaLuzNorm = normalize(focusPosition - position.xyz);
+
+
+	float theta = dot(incidenciaLuzNorm,normalize(-direccionFoco));
+
+	//iluminacion ambiental
+	vec4 iluminacionAmbientalL = colorOriginal*iluminacionAmbiental;
+
+	if(theta>aperturaMax){
+		//iluminacion difusa
+		float diff = max(dot(normalize(normal.xyz),incidenciaLuzNorm),0.0);
+		vec3 diffuse = intensidadFuenteDifusa * coeficienteDifuso * diff * colorOriginal.xyz;
+		
+		//iluminacion especular
+		vec3 viewPortDir = normalize(cameraPos - position.xyz);
+		vec3 reflectionDir = reflect(-incidenciaLuzNorm,normalize(normal.xyz));
+		float esp = pow(max(dot(reflectionDir, viewPortDir), 0.0), rugosidad);
+		vec3 specular = intensidadFuenteEspecular * coeficienteEspecular * esp * vec3(1,1,1);
+		
+		//atenuaciones
+		float epsilon = aperturaMin - aperturaMax;
+		float inte = clamp((theta-aperturaMax)/epsilon,0,1);
+   		vec4 sumaIluminaciones = vec4(specular + iluminacionAmbientalL.xyz + diffuse, 1);
+		
+		color = inte*factorAtenuacion*sumaIluminaciones;
+
+	}else{
+		color = factorAtenuacion * iluminacionAmbientalL;
+	}
+*/
+	//color = vec4(1,1,1,1);
 }

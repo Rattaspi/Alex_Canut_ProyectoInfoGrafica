@@ -4,7 +4,7 @@
 #include <GLFW\glfw3.h>
 
 class Camera {
-	
+	glm::vec3 cameraPos;
 	glm::vec3 cameraUp;
 	glm::vec3 cameraFront;
 	glm::vec3 cameraRight;
@@ -19,14 +19,19 @@ class Camera {
 	GLfloat FOV;
 
 public:
-	glm::vec3 cameraPos;
+	
 	Camera(glm::vec3, glm::vec3, GLfloat, GLfloat);
 	void DoMovement(GLFWwindow*);
 	void MouseMove(GLFWwindow*,double,double);
 	void MouseScroll(GLFWwindow*, double, double);
 	glm::mat4 LookAt();
 	GLfloat GetFOV();
+	glm::vec3 GetPosition();
 };
+
+glm::vec3 Camera::GetPosition() {
+	return cameraPos;
+}
 
 Camera::Camera(glm::vec3 position, glm::vec3 direction, GLfloat sensivility, GLfloat fov) {
 	lastFrame = 0;
