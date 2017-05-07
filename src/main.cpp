@@ -140,7 +140,7 @@ int main() {
 
 		//luces
 		//AMBIENTAL
-		float intensidadAmbiental = 0.2;
+		float intensidadAmbiental = 0.1;
 		float coeficienteReflexionAmbiental = 1.f;
 		glm::vec3 colorAmbiental(1, 1, 1);
 		glm::vec3 luzAmbiental = intensidadAmbiental * coeficienteReflexionAmbiental * colorAmbiental;
@@ -155,10 +155,14 @@ int main() {
 		glm::vec3 luzEspecular = intensidadEspecular * coeficienteReflexionEspecular * glm::vec3(1, 1, 1);
 		float roughness = 230.0f;
 
+		//atenuacion, se utiliza en phong
 		float c1, c2, c3;
 		c1 = 1.0f;
 		c2 = 0.045;
 		c3 = 0.0075f;
+	
+		float factorAtenuacion = 1 / (1 + c2*(incidenciaLuz.length()) + c3*(incidenciaLuz.length() * incidenciaLuz.length()));
+
 
 		glm::vec3 focusPos = staticBox.GetPosition();
 
@@ -168,11 +172,11 @@ int main() {
 		glUniform3f(glGetUniformLocation(phongShader.Program, "cameraPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
 		glUniform3f(glGetUniformLocation(phongShader.Program, "incidenciaLuz"), incidenciaLuz.x, incidenciaLuz.y, incidenciaLuz.z);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadDifusa"), intensidadDifusa);
-		glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionDifuso"), coeficienteReflexionDifuso);
+		//glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionDifuso"), coeficienteReflexionDifuso);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadEspecular"), intensidadEspecular);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionEspecular"), coeficienteReflexionEspecular);
 		glUniform1f(glGetUniformLocation(phongShader.Program, "roughness"), roughness);
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "atenuacion"), factorAtenuacion);
+		glUniform1f(glGetUniformLocation(phongShader.Program, "atenuacion"), factorAtenuacion);
 		
 		//enviar datos de iluminacion al shader de luz direccional
 		glUniformMatrix4fv(glGetUniformLocation(directionalShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
