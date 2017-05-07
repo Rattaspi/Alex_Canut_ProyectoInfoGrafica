@@ -1,10 +1,53 @@
 #version 330 core
-
-in vec4 position;
-in vec4 normal;
-
+// Ouput data
 out vec4 color;
+in vec4 normal;
+in vec4 position;
+
+uniform vec3 luzAmbiental;
+uniform vec3 luzEspecular;
+uniform vec3 luzDifusa;
+uniform float roughness;
+uniform vec3 camPos;
+uniform vec3 focoPos;
+uniform vec3 direccionFoco;
+uniform float aperturaMax;
+uniform float aperturaMin;
 
 void main(){
-	color = vec4(0,0,1,1);
+  vec4 iluminacionDifusa;
+  vec4 iluminacionEspecular;
+  vec4 colorOriginal = vec4(0,0,1,1);
+  vec4 iluminacionAmbientalL = colorOriginal* vec4(luzAmbiental,1);
+
+  float d = length(focoPos - position.xyz);
+  float fAtt = 1/(1+0.045*d + 0.0075*d*d);
+     
+
+  vec3 incidenciaLuzNorm = normalize(focoPos - position.xyz);
+
+
+  float theta = dot(incidenciaLuzNorm,normalize(-direccionFoco));
+
+  if(theta > aperturaMax){ 
+    float diff = max(dot(normal.xyz,incidenciaLuzNorm),0.0);
+    vec3 diffuse = luzDifusa * diff*colorOriginal.xyz;
+
+    vec3 viewPortDir = normalize(camPos - position.xyz);
+    vec3 reflectionDir = reflect(-incidenciaLuzNorm, normal.xyz);
+    float esp = pow(max(dot(reflectionDir,viewPortDir),0.0),roughness);
+
+    vec3 specular = luzEspecular*esp*vec3(1,1,1);
+
+    float epsilon = aperturaMin - aperturaMax;
+    float inte = clamp((theta-aperturaMax)/epsilon,0,1);
+   
+    vec3 sumaIluminaciones = specular+iluminacionAmbientalL.xyz + diffuse;
+
+    color = vec4(inte*fAtt*sumaIluminaciones,1);
+   
+  }else{
+    color = fAtt * iluminacionAmbientalL;
+   // color = vec4(1,0,1,1);
+  }
 }
