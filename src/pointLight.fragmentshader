@@ -11,8 +11,6 @@ uniform vec3 luzDifusa;
 uniform vec3 luzAmbiental;
 uniform vec3 luzEspecular;
 uniform float roughness;
-uniform mat4 finalMat;
-
 
 void main(){
 	vec3 colorOriginal = vec3(0,0,1);

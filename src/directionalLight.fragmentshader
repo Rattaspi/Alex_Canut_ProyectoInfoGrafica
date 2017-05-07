@@ -5,31 +5,29 @@ in vec4 normal;
 
 out vec4 color;
 
-uniform float luzAmbiental;
+uniform vec3 luzAmbiental;
 uniform vec3 direccionLuz;
 uniform vec3 camPos;
 uniform vec3 focusPos;
 uniform float roughness;
-uniform float luzDifusa;
-uniform float luzEspecular;
+uniform vec3 luzDifusa;
+uniform vec3 luzEspecular;
 
 void main(){
-	vec4 normalNormal = normalize(normal);
-	color = vec4(0,0,1,1);
-	vec4 white = vec4(1,1,1,1);
+	vec3 colorOriginal = vec3(0,0,1);
 	
 	//calculo luz ambiental
-	vec4 Lamb = luzAmbiental * color;
+	vec4 Lamb = vec4(luzAmbiental * colorOriginal, 1);
 
 	//calculo luz difusa
-	float diff = max(dot(normalNormal.xyz, -normalize(direccionLuz)),0);
-	vec4 Ldif = luzDifusa * diff * color;
+	float diff = max(dot(normal.xyz, -normalize(direccionLuz)),0);
+	vec4 Ldif = vec4(luzDifusa * diff * colorOriginal, 1);
 
 	//calculo de la luz especular
 	vec3 V = normalize(camPos-position.xyz);
-	vec3 R = reflect(normalize(direccionLuz), normalNormal.xyz);
+	vec3 R = reflect(normalize(direccionLuz), normal.xyz);
 	float esp = pow(max(dot(R,V),0), roughness);
-	vec4 Lesp = luzEspecular * esp * white;
+	vec4 Lesp = vec4(luzEspecular * esp * vec3(1,1,1), 1);
 	
 	//color final
 	color = Lamb + Ldif + Lesp;
