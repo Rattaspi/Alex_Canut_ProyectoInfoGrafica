@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Object.cpp" />
@@ -29,6 +30,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="src\Camera.hpp" />
+    <ClInclude Include="src\material.h" />
     <ClInclude Include="src\Mesh.hpp" />
     <ClInclude Include="src\Model.hpp" />
     <ClInclude Include="src\Object.hpp" />

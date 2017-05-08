@@ -12,6 +12,7 @@
 #include "Mesh.hpp"
 #include "Model.hpp"
 #include "Object.hpp"
+#include "material.h"
 
 
 using namespace std;
@@ -74,7 +75,7 @@ int main() {
 
 	//cargamos los shader
 	Shader shader = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
-	Shader phongShader = Shader("./src/phongVertex.vertexshader", "./src/phongFragment.fragmentshader");
+	//Shader phongShader = Shader("./src/phongVertex.vertexshader", "./src/phongFragment.fragmentshader");
 	Shader directionalShader = Shader("./src/phongVertex.vertexshader", "./src/directionalLight.fragmentshader");
 	Shader pointShader = Shader("./src/phongVertex.vertexshader", "./src/pointLight.fragmentshader");
 	Shader focalShader = Shader("./src/phongVertex.vertexshader", "./src/focalLight.fragmentshader");
@@ -122,7 +123,7 @@ int main() {
 		//matrices de transformacion
 		modelMat = movingBox.GetModelMatrix();
 		finalMat = projectionMat*viewMat*modelMat;
-		glUniformMatrix4fv(glGetUniformLocation(phongShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
+		//glUniformMatrix4fv(glGetUniformLocation(phongShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
 		glUniformMatrix4fv(glGetUniformLocation(directionalShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
 		glUniformMatrix4fv(glGetUniformLocation(pointShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
 		glUniformMatrix4fv(glGetUniformLocation(focalShader.Program, "finalMat"), 1, GL_FALSE, glm::value_ptr(finalMat));
@@ -167,8 +168,8 @@ int main() {
 			glUniform3f(glGetUniformLocation(directionalShader.Program, "camPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
 			glUniform3f(glGetUniformLocation(directionalShader.Program, "focusPos"), focusPos.x, focusPos.y, focusPos.z);
 			glUniform1f(glGetUniformLocation(directionalShader.Program, "roughness"), roughness);
-			glUniform1f(glGetUniformLocation(directionalShader.Program, "luzDifusa"), intensidadDifusa);
-			glUniform1f(glGetUniformLocation(directionalShader.Program, "luzEspecular"), intensidadEspecular);
+			glUniform3f(glGetUniformLocation(directionalShader.Program, "luzDifusa"), luzDifusa.x, luzDifusa.y, luzDifusa.z);
+			glUniform3f(glGetUniformLocation(directionalShader.Program, "luzEspecular"), luzEspecular.x, luzEspecular.y, luzEspecular.z);
 			movingBox.Draw();
 		}
 		else if (shaderSelected == 2) {
@@ -199,38 +200,20 @@ int main() {
 			glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMin"), glm::cos(glm::radians(20.f)));
 			movingBox.Draw();
 		}
-		else {
-			phongShader.USE();
-			//enviar datos de iluminacion al shader de phong
-			glUniformMatrix4fv(glGetUniformLocation(phongShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
-			glUniform3f(glGetUniformLocation(phongShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
-			glUniform3f(glGetUniformLocation(phongShader.Program, "cameraPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
-			glUniform3f(glGetUniformLocation(phongShader.Program, "incidenciaLuz"), incidenciaLuz.x, incidenciaLuz.y, incidenciaLuz.z);
-			glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadDifusa"), intensidadDifusa);
-			glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionDifuso"), coeficienteReflexionDifuso);
-			glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadEspecular"), intensidadEspecular);
-			glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionEspecular"), coeficienteReflexionEspecular);
-			glUniform1f(glGetUniformLocation(phongShader.Program, "roughness"), roughness);
-			movingBox.Draw();
-		}
-
-		
-		//glUniform1f(glGetUniformLocation(phongShader.Program, "atenuacion"), factorAtenuacion);
-		
-		
-
-		
-		//glUniform1f(glGetUniformLocation(pointShader.Program, "atenuacion"), factorAtenuacion);
-
-		
-
-		
-
-		
-		//se pinta la caja
-		
-
-		
+		//else {
+		//	phongShader.USE();
+		//	//enviar datos de iluminacion al shader de phong
+		//	glUniformMatrix4fv(glGetUniformLocation(phongShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
+		//	glUniform3f(glGetUniformLocation(phongShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
+		//	glUniform3f(glGetUniformLocation(phongShader.Program, "cameraPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
+		//	glUniform3f(glGetUniformLocation(phongShader.Program, "incidenciaLuz"), incidenciaLuz.x, incidenciaLuz.y, incidenciaLuz.z);
+		//	glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadDifusa"), intensidadDifusa);
+		//	glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionDifuso"), coeficienteReflexionDifuso);
+		//	glUniform1f(glGetUniformLocation(phongShader.Program, "intensidadEspecular"), intensidadEspecular);
+		//	glUniform1f(glGetUniformLocation(phongShader.Program, "coeficienteReflexionEspecular"), coeficienteReflexionEspecular);
+		//	glUniform1f(glGetUniformLocation(phongShader.Program, "roughness"), roughness);
+		//	movingBox.Draw();
+		//}
 
 		glfwSwapBuffers(window);
 	}
