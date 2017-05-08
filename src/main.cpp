@@ -136,7 +136,7 @@ int main() {
 
 		//luces
 		//AMBIENTAL
-		float intensidadAmbiental = 0.5;
+		float intensidadAmbiental = 0.2;
 		float coeficienteReflexionAmbiental = 1.f;
 		glm::vec3 colorAmbiental(1, 1, 1);
 		glm::vec3 luzAmbiental = intensidadAmbiental * coeficienteReflexionAmbiental * colorAmbiental;
@@ -146,7 +146,7 @@ int main() {
 		float coeficienteReflexionDifuso = 1.f;
 		glm::vec3 luzDifusa = intensidadDifusa * coeficienteReflexionDifuso * glm::vec3(1, 1, 1);
 		//ESPECULAR
-		float intensidadEspecular = 0.4f;
+		float intensidadEspecular = 0.6f;
 		float coeficienteReflexionEspecular = 1.f;
 		glm::vec3 luzEspecular = intensidadEspecular * coeficienteReflexionEspecular * glm::vec3(1, 1, 1);
 		float roughness = 230.0f;
@@ -195,8 +195,8 @@ int main() {
 			glUniform3f(glGetUniformLocation(focalShader.Program, "camPos"), cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
 			glUniform1f(glGetUniformLocation(focalShader.Program, "roughness"), roughness);
 			glUniform3f(glGetUniformLocation(focalShader.Program, "direccionFoco"), -4, 0, 0);
-			glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMax"), glm::radians(45.f));
-			glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMin"), glm::radians(20.f));
+			glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMax"), glm::cos(glm::radians(45.f)));
+			glUniform1f(glGetUniformLocation(focalShader.Program, "aperturaMin"), glm::cos(glm::radians(20.f)));
 			movingBox.Draw();
 		}
 		else {
