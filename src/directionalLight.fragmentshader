@@ -36,7 +36,7 @@ void main(){
 	//calculo de la luz especular
 	vec3 V = normalize(camPos-position.xyz);
 	vec3 R = reflect(normalize(direccionLuz), normal.xyz);
-	float esp = pow(max(dot(R,V),0), roughness);
+	float esp = pow(max(dot(R,V),0), mat.shininess);
 	vec4 Lesp = vec4(luzEspecular * esp, 1) * texture(mat.TexturaEspecular, texCoords);
 	
 	//color final
