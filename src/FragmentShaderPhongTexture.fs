@@ -52,8 +52,13 @@ vec3 SpotLight(SLight light, vec3 Normal, vec3 viewDirection);
 
 void main(){
 	vec3 viewPortD = normalize(viewPos - FragPos);
-
-	color = vec4(DirectionalLight(dlight,Normal,viewPortD) + PointLight(plight[0], Normal, viewPortD) + SpotLight(slight[0], Normal, viewPortD), 1);
+	color = vec4(DirectionalLight(dlight,Normal, viewPortD), 1);
+	for(int i = 0; i <NUM_MAX_PLIGHTS; i++){
+		color += vec4(PointLight(plight[i],Normal,viewPortD), 1);
+	}
+	for(int i = 0; i < NUM_MAX_SLIGHTS; i++){
+		color += vec4(SpotLight(slight[i], Normal, viewPortD), 1);
+	}
 } 
 
 vec3 DirectionalLight(DLight light, vec3 Normal, vec3 viewDirection){

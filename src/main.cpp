@@ -90,24 +90,24 @@ int main() {
 	//caja controlable
 	Object movingBox(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0), glm::vec3(0), Object::cube);
 	//luz direccional
-	Light direccional(glm::vec3(0), glm::vec3(-1, -0.5, 0), glm::vec3(0.1), glm::vec3(0.4), glm::vec3(0.2), Light::LType::DIRECTIONAL, 0);
+	Light direccional(glm::vec3(0), glm::vec3(-1, -0.5, 0), glm::vec3(0.05), glm::vec3(0.2), glm::vec3(0.2), Light::LType::DIRECTIONAL, 0);
 	//luces puntuales y puntos de luz
-	Object staticBox0(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(2.f, 0.f, 0.f), Object::cube);
-	Light point1(staticBox0.GetPosition(), glm::vec3(0), glm::vec3(0.1), glm::vec3(0.5), glm::vec3(0.2), Light::LType::POINT, 0);
-	Object staticBox1(glm::vec3(0.1), glm::vec3(0), glm::vec3(-1, 1, -1), Object::cube);
-	Light point2(staticBox1.GetPosition(), glm::vec3(0), glm::vec3(0.1), glm::vec3(0.5), glm::vec3(0.2), Light::LType::POINT, 1);
+	Object staticBox0(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(1.f, 1.f, 0.f), Object::cube);
+	Light point1(staticBox0.GetPosition(), glm::vec3(0), glm::vec3(0.05), glm::vec3(0.3), glm::vec3(0.2), Light::LType::POINT, 0);
+	Object staticBox1(glm::vec3(0.1), glm::vec3(0), glm::vec3(-1, 1, 0), Object::cube);
+	Light point2(staticBox1.GetPosition(), glm::vec3(0), glm::vec3(0.05), glm::vec3(0.3), glm::vec3(0.2), Light::LType::POINT, 1);
 	//luces focales y puntos de luz
-	Object staticBox2(glm::vec3(0.1), glm::vec3(0), glm::vec3(0, 0.5, 0.5), Object::cube);
-	Light spot1(staticBox2.GetPosition(), glm::vec3(-staticBox2.GetPosition()), glm::vec3(0.1), glm::vec3(0.5), glm::vec3(0.2), Light::LType::SPOT, 0);
-	Object staticBox3(glm::vec3(0.1), glm::vec3(0), glm::vec3(-1, -1, 0), Object::cube);
-	Light spot2(staticBox3.GetPosition(), glm::vec3(1, 0, 0), glm::vec3(0.1), glm::vec3(0.5), glm::vec3(0.2), Light::LType::SPOT, 1);
+	Object staticBox2(glm::vec3(0.1), glm::vec3(0), glm::vec3(1, 0, 0), Object::cube);
+	Light spot1(glm::vec3(1, 0, 0), glm::vec3(0,-1,0), glm::vec3(0.05), glm::vec3(0.5), glm::vec3(0.2), Light::LType::SPOT, 0);
+	Object staticBox3(glm::vec3(0.1), glm::vec3(0), glm::vec3(-1, 0, 0), Object::cube);
+	Light spot2(glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0), glm::vec3(0.05), glm::vec3(0.5), glm::vec3(0.2), Light::LType::SPOT, 1);
 
 	point1.SetAtt(1.0f, 0.35f, 0.44f);
 	point2.SetAtt(1.0f, 0.35f, 0.44f);
 	spot1.SetAtt(1.0f, 0.35f, 0.44f);
 	spot2.SetAtt(1.0f, 0.35f, 0.44f);	
-	spot1.SetAperture(20.0f, 50.0f);
-	spot2.SetAperture(20.0f, 50.0f);
+	spot1.SetAperture(5.0f, 10.0f);
+	spot2.SetAperture(5.0f, 10.0f);
 	
 
 	GLint finalMatID = glGetUniformLocation(shader.Program, "finalMat");
