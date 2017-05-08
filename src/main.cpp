@@ -24,7 +24,6 @@ glm::mat4 LookAt(glm::vec3, glm::vec3, glm::vec3, glm::vec3);
 void Mouse_Callback(GLFWwindow*, double, double);
 void Wheel_Callback(GLFWwindow*, double, double);
 
-float mCoef = 0;
 bool rotRight, rotLeft, rotUp, rotDown, fade = false; //controla que siga rotando mientras se mantiene pulsado
 float rotX, rotY = 0.0f; //controla el valor de rotacion que se aplicará a la rotacion en la modelMat
 float inc = 0.2f; //coeficiente con el cual se incrementa la rotacion
@@ -80,6 +79,9 @@ int main() {
 	Shader pointShader = Shader("./src/phongVertex.vertexshader", "./src/pointLight.fragmentshader");
 	Shader focalShader = Shader("./src/phongVertex.vertexshader", "./src/focalLight.fragmentshader");
 
+	//carga de materiales
+	Material mat("./src/difuso.png", "./src/especular.png", 230.f);
+
 	glEnable(GL_DEPTH_TEST);
 
 	//se instancian las dos cajas
@@ -87,7 +89,7 @@ int main() {
 	Object staticBox(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0), glm::vec3(4.f, 0.f, 0.f), Object::cube);
 
 	GLint finalMatID = glGetUniformLocation(shader.Program, "finalMat");
-	int shaderSelected = 0;
+	int shaderSelected = 1;
 
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -159,8 +161,13 @@ int main() {
 
 		glm::vec3 focusPos = staticBox.GetPosition();
 
+		//LUZ DIRECCIONAL
 		if (shaderSelected == 1) {
 			directionalShader.USE();
+			//activar las cosas de la textura
+			mat.ActivateTextures();
+			mat.SetMaterial(&directionalShader);
+			mat.SetShininess(&directionalShader);
 			//enviar datos de iluminacion al shader de luz direccional
 			glUniformMatrix4fv(glGetUniformLocation(directionalShader.Program, "modelMat"), 1, GL_FALSE, glm::value_ptr(movingBox.GetModelMatrix()));
 			glUniform3f(glGetUniformLocation(directionalShader.Program, "luzAmbiental"), luzAmbiental.x, luzAmbiental.y, luzAmbiental.z);
@@ -172,6 +179,7 @@ int main() {
 			glUniform3f(glGetUniformLocation(directionalShader.Program, "luzEspecular"), luzEspecular.x, luzEspecular.y, luzEspecular.z);
 			movingBox.Draw();
 		}
+		//LUZ PUNTUAL
 		else if (shaderSelected == 2) {
 			pointShader.USE();
 			//enviar datos de iluminacion al shader de luz puntual
@@ -184,6 +192,7 @@ int main() {
 			glUniform1f(glGetUniformLocation(pointShader.Program, "roughness"), roughness);
 			movingBox.Draw();
 		}
+		//LUZ FOCAL
 		else if (shaderSelected == 3) {
 			focalShader.USE();
 

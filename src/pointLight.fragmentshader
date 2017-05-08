@@ -2,6 +2,7 @@
 
 in vec4 position;
 in vec4 normal;
+in vec2 texCoords;
 
 out vec4 color;
 
@@ -11,6 +12,14 @@ uniform vec3 luzDifusa;
 uniform vec3 luzAmbiental;
 uniform vec3 luzEspecular;
 uniform float roughness;
+
+struct Material{
+	sampler2D TexturaDifusa;
+	sampler2D TexturaEspecular;
+	float shininess;
+};
+
+uniform Material mat;
 
 void main(){
 	vec3 colorOriginal = vec3(0,0,1);

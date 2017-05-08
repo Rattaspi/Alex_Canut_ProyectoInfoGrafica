@@ -2,6 +2,7 @@
 
 in vec4 position;
 in vec4 normal;
+in vec2 texCoords;
 
 out vec4 color;
 
@@ -13,21 +14,30 @@ uniform float roughness;
 uniform vec3 luzDifusa;
 uniform vec3 luzEspecular;
 
+
+struct Material{
+	sampler2D TexturaDifusa;
+	sampler2D TexturaEspecular;
+	float shininess;
+};
+
+uniform Material mat;
+
 void main(){
 	vec3 colorOriginal = vec3(0,0,1);
 	
 	//calculo luz ambiental
-	vec4 Lamb = vec4(luzAmbiental * colorOriginal, 1);
+	vec4 Lamb = vec4(luzAmbiental,1) * texture(mat.TexturaDifusa, texCoords);
 
 	//calculo luz difusa
 	float diff = max(dot(normal.xyz, -normalize(direccionLuz)),0);
-	vec4 Ldif = vec4(luzDifusa * diff * colorOriginal, 1);
+	vec4 Ldif = vec4(luzDifusa * diff, 1) * texture(mat.TexturaDifusa, texCoords);
 
 	//calculo de la luz especular
 	vec3 V = normalize(camPos-position.xyz);
 	vec3 R = reflect(normalize(direccionLuz), normal.xyz);
 	float esp = pow(max(dot(R,V),0), roughness);
-	vec4 Lesp = vec4(luzEspecular * esp * vec3(1,1,1), 1);
+	vec4 Lesp = vec4(luzEspecular * esp, 1) * texture(mat.TexturaEspecular, texCoords);
 	
 	//color final
 	color = Lamb + Ldif + Lesp;

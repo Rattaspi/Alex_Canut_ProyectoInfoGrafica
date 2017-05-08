@@ -3,6 +3,7 @@
 out vec4 color;
 in vec4 normal;
 in vec4 position;
+in vec2 texCoords;
 
 uniform vec3 luzAmbiental;
 uniform vec3 luzEspecular;
@@ -13,6 +14,14 @@ uniform vec3 focoPos;
 uniform vec3 direccionFoco;
 uniform float aperturaMax;
 uniform float aperturaMin;
+
+struct Material{
+  sampler2D TexturaDifusa;
+  sampler2D TexturaEspecular;
+  float shininess;
+};
+
+uniform Material mat;
 
 void main(){
   vec3 diffuse;
