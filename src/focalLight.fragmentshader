@@ -29,7 +29,7 @@ void main(){
   vec4 colorOriginal = vec4(0,0,1,1);
 
   //AMBIENTAL
-  vec4 iluminacionAmbientalL = colorOriginal* vec4(luzAmbiental,1);
+  vec4 iluminacionAmbientalL = texture(mat.TexturaDifusa, texCoords) * vec4(luzAmbiental,1);
   //ATENUACION
   float d = length(focoPos - position.xyz);
   float fAtt = 1/(1+0.045*d + 0.0075*d*d);
@@ -39,13 +39,13 @@ void main(){
   float theta = dot(incidenciaLuzNorm, normalize(-direccionFoco));
   //DIFUSA
   float diff = max(dot(normal.xyz,incidenciaLuzNorm),0.0);
-  diffuse = luzDifusa * diff*colorOriginal.xyz;
+  diffuse = luzDifusa * diff*texture(mat.TexturaDifusa, texCoords).xyz;
   //ESPECULAR
   vec3 viewPortDir = normalize(camPos - position.xyz);
   vec3 reflectionDir = reflect(-incidenciaLuzNorm, normal.xyz);
   float esp = pow(max(dot(reflectionDir,viewPortDir),0.0),roughness);
 
-  specular = luzEspecular*esp*vec3(1,1,1);
+  specular = luzEspecular*esp*texture(mat.TexturaEspecular, texCoords).xyz;
 
   float epsilon = aperturaMin - aperturaMax;
   float inte = clamp((theta-aperturaMax)/epsilon,0,1);
